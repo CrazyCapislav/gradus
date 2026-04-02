@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client"
@@ -19,18 +14,188 @@ enum Role {
   Admin
 }
 
+enum ProjectStatus {
+  Active
+  ReadyForGrade
+  Completed
+  Archived
+}
+
+enum StageStatus {
+  Active
+  SoftDeadlinePassed
+  Closed
+  Graded
+}
+
+enum StageResultStatus {
+  Submitted
+  Returned
+  Graded
+}
+
 model User {
   id String @id @db.Uuid @default(uuid())
-  email String @unique
-  passwordHash String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  firstName String
-  lastName String
+  email String @unique 
+  passwordHash String @map("password_hash")
+  createdAt DateTime @default(now())  @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  firstName String  @map("first_name")
+  lastName String @map("last_name")
   patronymic String?
   role Role @default(Student)
-  avatarUrl String?
-  isConfirmedEmail Boolean @default(false)
-  oauthProvider String?
-  oauthId String?
+  avatarUrl String? @map("avatar_url")
+  isConfirmedEmail Boolean @default(false) @map("is_confirmed_email")
+  oauthProvider String? @map("oauth_provider")
+  oauthId String? @map("oauth_id")
+
+  projects Project[] 
+  refreshTokens RefreshToken[]
+  members ProjectMember[]
+  stageResults StageResult[]
+  gradesGiven Grade[]
+  notifications Notification[]
+  finalGradesReceived FinalGrade[] @relation("FinalGradesReceived")
+  finalGradesGiven FinalGrade[] @relation("FinalGradesGiven")
+
+  @@map("users")
+}
+
+model Project {
+  id String @id @db.Uuid @default(uuid()) 
+  teacherId String @db.Uuid @map("teacher_id") 
+  teacher User @relation(fields: [teacherId], references: [id])
+  title String 
+  description String? 
+  status ProjectStatus @default(Active)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  members ProjectMember[]
+  stages Stage[]
+  finalGrades FinalGrade[]
+
+  @@map("projects")
+}
+
+model RefreshToken {
+  id String @id @db.Uuid @default(uuid())
+  userId String @db.Uuid @map("user_id")
+  user User @relation(fields: [userId], references: [id])
+  token String  @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("refresh_tokens")
+}
+
+model ProjectMember {
+  id String @id @db.Uuid @default(uuid())
+  projectId String @db.Uuid @map("project_id") 
+  project Project @relation(fields: [projectId], references: [id])
+  userId String @db.Uuid @map("user_id") 
+  user User @relation(fields: [userId], references: [id])
+  addedAt DateTime @default(now()) @map("added_at")
+
+  @@map("project_members")
+  @@unique([projectId, userId])
+}
+
+model Stage {
+  id String @id @db.Uuid @default(uuid())
+  projectId String @db.Uuid @map("project_id")
+  project Project @relation(fields: [projectId], references: [id])
+  parentStageId String? @db.Uuid @map("parent_stage_id")
+  parentStage Stage? @relation("SubStages", fields: [parentStageId], references: [id])
+  subStages Stage[] @relation("SubStages")
+  title String
+  description String?
+  stageOrder Int @map("stage_order")
+  softDeadline DateTime? @map("soft_deadline")
+  hardDeadline DateTime? @map("hard_deadline")
+  status StageStatus @default(Active)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  stageResults StageResult[]
+
+  @@map("stages")
+}
+
+model StageResult {
+  id String @id @db.Uuid @default(uuid())
+  stageId String @db.Uuid @map("stage_id")
+  stage Stage @relation(fields: [stageId], references: [id])
+  studentId String @db.Uuid @map("student_id")
+  student User @relation(fields: [studentId], references: [id])
+  contentText String? @map("content_text")
+  feedback String? 
+  status StageResultStatus @default(Submitted)
+  isLate Boolean @default(false) @map("is_late")
+  submittedAt DateTime? @map("submitted_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  grade Grade?
+  fileAttachments FileAttachment[]
+
+  @@map("stage_results")
+  @@unique([stageId, studentId])
+}
+
+model Grade {
+  id String @id @db.Uuid @default(uuid())
+  stageResultId String @db.Uuid @unique @map("stage_result_id")
+  stageResult StageResult @relation(fields: [stageResultId], references: [id])
+  score Decimal @db.Decimal(5, 2)
+  maxScore Decimal @map("max_score") @db.Decimal(5, 2)
+  feedback String? 
+  gradedAt DateTime @default(now()) @map("graded_at")
+  gradedById String @db.Uuid @map("graded_by")
+  gradedBy User @relation(fields: [gradedById], references: [id])
+
+  @@map("grades")
+}
+
+model FileAttachment {
+  id String @id @db.Uuid @default(uuid())
+  stageResultId String @db.Uuid @map("stage_result_id")
+  stageResult StageResult @relation(fields: [stageResultId], references: [id])
+  originalName String @map("original_name")
+  filePath String @map("file_path")
+  fileSize Int @map("file_size")
+  mimeType String @map("mime_type")
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+
+  @@map("file_attachments")
+}
+
+model Notification {
+  id String @id @db.Uuid @default(uuid())
+  userId String @db.Uuid @map("user_id")
+  user User @relation(fields: [userId], references: [id])
+  type String
+  message String
+  referenceId String? @map("reference_id")
+  referenceType String? @map("reference_type")
+  isRead Boolean @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("notifications")
+}
+
+model FinalGrade {
+  id String @id @db.Uuid @default(uuid())
+  projectId String @db.Uuid @map("project_id")
+  project Project @relation(fields: [projectId], references: [id])
+  studentId String @db.Uuid @map("student_id")
+  student User @relation("FinalGradesReceived", fields: [studentId], references: [id])
+  score Decimal @db.Decimal(5, 2)
+  feedback String? 
+  gradedAt DateTime @default(now()) @map("graded_at")
+  gradedById String @db.Uuid @map("graded_by")
+  gradedBy User @relation("FinalGradesGiven", fields: [gradedById], references: [id])
+
+  @@map("final_grades")
+  @@unique([projectId, studentId])
 }
