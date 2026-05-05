@@ -1,28 +1,60 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "athena-backend",
-  "homepage": "https://github.com/CrazyCapislav/athena-lms#readme",
+  "description": "gradus-backend",
+  "homepage": "https://github.com/CrazyCapislav/gradus#readme",
   "bugs": {
-    "url": "https://github.com/CrazyCapislav/athena-lms/issues"
+    "url": "https://github.com/CrazyCapislav/gradus/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/CrazyCapislav/athena-lms.git"
+    "url": "git+ssh://git@github.com/CrazyCapislav/gradus.git"
   },
   "license": "MIT",
   "author": "Kenzhaev Rahim",
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest",
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test-coverage": "vitest run --coverage"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.1.0",
     "@types/node": "^25.4.0",
-    "prisma": "^7.4.2"
+    "@types/nodemailer": "^8.0.0",
+    "@types/pg": "^8.20.0",
+    "@types/supertest": "^7.2.0",
+    "@vitest/coverage-v8": "^4.1.5",
+    "prisma": "^7.4.2",
+    "supertest": "^7.2.2",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.6.0",
     "@prisma/client": "^7.4.2",
-    "dotenv": "^17.3.1"
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-validator": "^7.3.2",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.4",
+    "pg": "^8.20.0",
+    "winston": "^3.19.0",
+    "zod": "^4.3.6"
   }
 }

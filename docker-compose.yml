@@ -1,9 +1,9 @@
 services:
   db:
     image: postgres:18-alpine
-    container_name: athena-server-db
+    container_name: gradus-db
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-athena_db}
+      POSTGRES_DB: ${POSTGRES_DB:-gradus_db}
       POSTGRES_USER: ${POSTGRES_USER:-admin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
     volumes:
@@ -12,11 +12,40 @@ services:
       - '${DB_PORT:-5432}:5432'
     restart: unless-stopped
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-athena_db}']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-gradus_db}']
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 5s
+
+  backend:
+    build: ./backend
+    container_name: gradus-backend
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@db:5432/${POSTGRES_DB:-gradus_db}
+      JWT_SECRET: ${JWT_SECRET:-adminjwt}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-adminrefreshjwt}
+      PORT: 3000
+    ports:
+      - '3000:3000'
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "npx prisma migrate deploy && node dist/server.js"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:3000/api
+    container_name: gradus-frontend
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+    restart: unless-stopped
+
   adminer:
     image: adminer:latest
     restart: always
@@ -25,6 +54,5 @@ services:
 
 volumes:
   postgres_data:
-    name: athena-postgres-data
+    name: gradus-postgres-data
     driver: local
-
