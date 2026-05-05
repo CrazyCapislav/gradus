@@ -46,10 +46,49 @@ async function deleteProject(projectId: string) {
 
 async function addMember(projectId: string, userId: string) {
     await prisma.projectMember.create({
+        data: { projectId, userId }
+    });
+}
+
+async function inviteUser(projectId: string, invitedUserId: string, teacherName: string, projectTitle: string) {
+    const existing = await prisma.notification.findFirst({
+        where: { userId: invitedUserId, type: "project_invitation", referenceId: projectId, isRead: false }
+    });
+    if (existing) throw new Error("Invitation already sent");
+
+    await prisma.notification.create({
         data: {
-            projectId, userId
+            userId: invitedUserId,
+            type: "project_invitation",
+            message: `${teacherName} приглашает вас в проект «${projectTitle}»`,
+            referenceId: projectId,
+            referenceType: "Project",
         }
     });
+}
+
+async function acceptInvitation(projectId: string, userId: string) {
+    const notification = await prisma.notification.findFirst({
+        where: { userId, type: "project_invitation", referenceId: projectId }
+    });
+    const alreadyMember = await prisma.projectMember.findUnique({
+        where: { projectId_userId: { projectId, userId } }
+    });
+    if (!alreadyMember) {
+        await prisma.projectMember.create({ data: { projectId, userId } });
+    }
+    if (notification) {
+        await prisma.notification.update({ where: { id: notification.id }, data: { isRead: true } });
+    }
+}
+
+async function declineInvitation(projectId: string, userId: string) {
+    const notification = await prisma.notification.findFirst({
+        where: { userId, type: "project_invitation", referenceId: projectId }
+    });
+    if (notification) {
+        await prisma.notification.update({ where: { id: notification.id }, data: { isRead: true } });
+    }
 }
 
 async function removeMember(projectId: string, userId: string) {
@@ -73,6 +112,9 @@ export default {
     updateProject,
     deleteProject,
     addMember,
+    inviteUser,
+    acceptInvitation,
+    declineInvitation,
     removeMember,
     submitProject
 };

@@ -11,6 +11,9 @@ router.get("/:id", authenticate, projectController.getProjectById);
 router.put("/:id", authenticate, projectController.updateProject);
 router.delete("/:id", authenticate, projectController.deleteProject);
 router.post("/:id/members", authenticate, projectController.addMember);
+router.post("/:id/invite", authenticate, projectController.inviteUser);
+router.post("/:id/invitations/accept", authenticate, projectController.acceptInvitation);
+router.post("/:id/invitations/decline", authenticate, projectController.declineInvitation);
 router.delete("/:id/members", authenticate, projectController.removeMember);
 router.post("/:id/submit", authenticate, projectController.submitProject);
 

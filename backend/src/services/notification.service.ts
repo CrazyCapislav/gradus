@@ -3,9 +3,8 @@ import type { NotificationModel } from "../generated/prisma/models.js";
 
 async function getNotifications(userId: string): Promise<NotificationModel[]> {
     return prisma.notification.findMany({
-        where: {
-            userId
-        }
+        where: { userId },
+        orderBy: { createdAt: "desc" }
     });
 }
 

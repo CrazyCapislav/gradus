@@ -34,6 +34,18 @@ export const addMember = async (projectId: string, userId: string): Promise<void
     await client.post(`/projects/${projectId}/members`, { userId });
 }
 
+export const inviteUser = async (projectId: string, userId: string): Promise<void> => {
+    await client.post(`/projects/${projectId}/invite`, { userId });
+}
+
+export const acceptInvitation = async (projectId: string): Promise<void> => {
+    await client.post(`/projects/${projectId}/invitations/accept`);
+}
+
+export const declineInvitation = async (projectId: string): Promise<void> => {
+    await client.post(`/projects/${projectId}/invitations/decline`);
+}
+
 export const removeMember = async (projectId: string, userId: string): Promise<void> => {
     await client.delete(`/projects/${projectId}/members`, { data: { userId } });
 }

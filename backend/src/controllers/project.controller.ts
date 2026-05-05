@@ -75,6 +75,45 @@ async function addMember(req: Request<{id: string}>, res: Response): Promise<voi
     }
 }
 
+async function inviteUser(req: Request<{id: string}>, res: Response): Promise<void> {
+    const { id } = req.params;
+    const { userId } = req.body;
+    try {
+        const project = await ProjectService.getProjectById(id);
+        if (!project) { res.status(404).json({ message: "Project not found" }); return; }
+        const teacher = req.user!;
+        const teacherRecord = await import("../prisma/prisma.js").then(m =>
+            m.prisma.user.findUnique({ where: { id: teacher.userId }, select: { firstName: true, lastName: true } })
+        );
+        const teacherName = teacherRecord ? `${teacherRecord.firstName} ${teacherRecord.lastName}` : "Преподаватель";
+        await ProjectService.inviteUser(id, userId, teacherName, project.title);
+        res.status(200).json({ message: "Invitation sent" });
+    } catch (error) {
+        const msg = error instanceof Error ? error.message : "Error sending invitation";
+        res.status(msg === "Invitation already sent" ? 409 : 500).json({ message: msg });
+    }
+}
+
+async function acceptInvitation(req: Request<{id: string}>, res: Response): Promise<void> {
+    const { id } = req.params;
+    try {
+        await ProjectService.acceptInvitation(id, req.user!.userId);
+        res.status(200).json({ message: "Invitation accepted" });
+    } catch (error) {
+        res.status(500).json({ message: error instanceof Error ? error.message : "Error accepting invitation" });
+    }
+}
+
+async function declineInvitation(req: Request<{id: string}>, res: Response): Promise<void> {
+    const { id } = req.params;
+    try {
+        await ProjectService.declineInvitation(id, req.user!.userId);
+        res.status(200).json({ message: "Invitation declined" });
+    } catch (error) {
+        res.status(500).json({ message: error instanceof Error ? error.message : "Error declining invitation" });
+    }
+}
+
 async function removeMember(req: Request<{id: string}>, res: Response): Promise<void> {
     const { id } = req.params;
     const { userId } = req.body;
@@ -104,6 +143,9 @@ export default {
     updateProject,
     deleteProject,
     addMember,
+    inviteUser,
+    acceptInvitation,
+    declineInvitation,
     removeMember,
     submitProject
 };
