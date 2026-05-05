@@ -15,9 +15,8 @@ function RegisterPage() {
         const password = formData.get("password") as string;
         const firstName = formData.get("firstName") as string;
         const lastName = formData.get("lastName") as string;
-        const role = formData.get("role") as "Student" | "Teacher" | "Admin";
 
-        register(firstName, lastName, email, password, role)
+        register(firstName, lastName, email, password)
             .then(() => {
                 setRegistered(true);
             })
@@ -67,13 +66,6 @@ function RegisterPage() {
                     <div className="form-group">
                         <label htmlFor="password">{t.password}</label>
                         <input className="input" type="password" id="password" name="password" required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="role">{t.role}</label>
-                        <select className="input" id="role" name="role" required>
-                            <option value="Student">{t.student}</option>
-                            <option value="Teacher">{t.teacher}</option>
-                        </select>
                     </div>
                     {error && <p className="error-msg">{error}</p>}
                     <button className="btn btn-primary" style={{width: '100%', marginTop: '8px'}} type="submit">{t.register}</button>

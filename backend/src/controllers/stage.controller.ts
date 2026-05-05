@@ -12,6 +12,16 @@ async function createStage(req: Request<{projectId: string}>, res: Response): Pr
     }
 }
 
+async function getStageById(req: Request<{stageId: string}>, res: Response): Promise<void> {
+    const { stageId } = req.params;
+    try {
+        const stage = await StageService.getStageById(stageId);
+        res.status(200).json(stage);
+    } catch (error) {
+        res.status(404).json({ message: error instanceof Error ? error.message : "Stage not found" });
+    }
+}
+
 async function getStages(req: Request<{projectId: string}>, res: Response): Promise<void> {
     const { projectId } = req.params;
     try {
@@ -45,6 +55,7 @@ async function deleteStage(req: Request<{stageId: string}>, res: Response): Prom
 
 export default {
     createStage,
+    getStageById,
     getStages,
     updateStage,
     deleteStage

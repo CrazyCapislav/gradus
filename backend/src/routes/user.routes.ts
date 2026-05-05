@@ -6,7 +6,7 @@ import { requireRole } from "../middleware/requireRole.js";
 const router = express.Router();
 
 router.get("/search", authenticate, userController.searchUser);
-router.get("/", authenticate, requireRole("Admin"), userController.listUsers);
+router.get("/", authenticate, userController.listUsers);
 router.delete("/:id", authenticate, requireRole("Admin"), userController.deleteUser);
 
 export default router;

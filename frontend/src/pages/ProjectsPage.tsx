@@ -4,6 +4,8 @@ import { useAuth } from '../store/useAuth';
 import { useLang } from '../store/langStore';
 import type { Project } from '../types';
 import { Link } from 'react-router-dom';
+import RichTextEditor from '../components/RichTextEditor';
+import RichTextDisplay from '../components/RichTextDisplay';
 
 function ProjectsPage() {
     const {user} = useAuth();
@@ -60,16 +62,19 @@ function ProjectsPage() {
         <div className="page">
             <div className="page-header">
                 <h1>{t.projects}</h1>
-                {user?.role === 'Teacher' && (
-                    <button className="btn btn-primary" onClick={() => setShowModal(true)}>{t.createProject}</button>
-                )}
+                <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px'}}>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 2V14M2 8H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                        {t.createProject}
+                    </button>
             </div>
             
             {projects.map((project) => (
                 <Link className="card-link" key={project.id} to={`/projects/${project.id}`}>
                     <div className="card">
                         <h2 className="card-title">{project.title}</h2>
-                        <p className="card-desc">{project.description}</p>
+                        <RichTextDisplay html={project.description ?? ''} style={{fontSize: '14px', color: 'var(--text-secondary)'}} />
                     </div>
                 </Link>
             ))}
@@ -84,7 +89,7 @@ function ProjectsPage() {
                     </div>
                     <div className="form-group">
                         <label>{t.description}</label>
-                        <input className="input" value={newDescription} onChange={e => setNewDescription(e.target.value)} placeholder={t.description} />
+                        <RichTextEditor value={newDescription} onChange={setNewDescription} placeholder={t.description} minHeight="100px" />
                     </div>
                     <div style={{display:'flex', gap:'8px', justifyContent:'flex-end', marginTop:'20px'}}>
                         <button className="btn btn-ghost" onClick={() => setShowModal(false)}>{t.cancel}</button>

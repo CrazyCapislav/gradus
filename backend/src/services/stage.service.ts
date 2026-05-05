@@ -16,6 +16,12 @@ async function createStage(projectId: string, data: { title: string; stageOrder:
     });
 }
 
+async function getStageById(stageId: string): Promise<StageModel> {
+    const stage = await prisma.stage.findUnique({ where: { id: stageId } });
+    if (!stage) throw new Error("Stage not found");
+    return stage;
+}
+
 async function getStages(projectId: string): Promise<StageModel[]> {
     return await prisma.stage.findMany({
         where: { projectId }
@@ -37,6 +43,7 @@ async function deleteStage(stageId: string): Promise<void> {
 
 export default {
     createStage,
+    getStageById,
     getStages,
     updateStage,
     deleteStage

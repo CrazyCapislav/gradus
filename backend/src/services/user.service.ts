@@ -10,6 +10,7 @@ async function findUserByEmail(email: string) {
 
 async function listUsers() {
     return await prisma.user.findMany({
+        where: { role: { not: "Admin" } },
         select: { id: true, email: true, firstName: true, lastName: true, role: true },
         orderBy: { createdAt: "asc" }
     });

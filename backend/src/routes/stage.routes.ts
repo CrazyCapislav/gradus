@@ -5,6 +5,7 @@ const router = express.Router({ mergeParams: true });
 
 router.post("/", authenticate, stageController.createStage);
 router.get("/", authenticate, stageController.getStages);
+router.get("/:stageId", authenticate, stageController.getStageById);
 router.put("/:stageId", authenticate, stageController.updateStage);
 router.delete("/:stageId", authenticate, stageController.deleteStage);
 
