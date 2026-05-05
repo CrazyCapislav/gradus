@@ -4,6 +4,8 @@ import type { UserModel } from "../generated/prisma/models.js";
 import { Role } from "../generated/prisma/enums.js";
 import jwt from "jsonwebtoken";
 import { sendVerificationEmail } from "./email.service.js";
+import { getGoogleUser } from "./google.service.js";
+import { getItmoUser } from "./itmo.service.js";
 
 async function register(email: string, password: string, firstName: string, lastName: string, role: Role): Promise<UserModel> {
     const passwordHash = await bcrypt.hash(password, 10);
@@ -18,13 +20,23 @@ async function register(email: string, password: string, firstName: string, last
         }
     });
 
-    const token = jwt.sign(
-        { userId: user.id, type: "email-verification" },
-        process.env.JWT_SECRET!,
-        { expiresIn: "24h" }
-    );
+    const smtpReady = !!process.env.RESEND_API_KEY;
 
-    await sendVerificationEmail(email, firstName, token);
+    if (smtpReady) {
+        const token = jwt.sign(
+            { userId: user.id, type: "email-verification" },
+            process.env.JWT_SECRET!,
+            { expiresIn: "24h" }
+        );
+        try {
+            await sendVerificationEmail(email, firstName, token);
+        } catch (err) {
+            console.error("Email send failed, auto-confirming:", err);
+            await prisma.user.update({ where: { id: user.id }, data: { isConfirmedEmail: true } });
+        }
+    } else {
+        await prisma.user.update({ where: { id: user.id }, data: { isConfirmedEmail: true } });
+    }
 
     return user;
 }
@@ -109,10 +121,75 @@ async function refreshTokens(refreshToken: string): Promise<{ accessToken: strin
 }
 
 
+async function loginWithOAuth(
+    provider: string,
+    oauthId: string,
+    email: string,
+    firstName: string,
+    lastName: string
+): Promise<{ accessToken: string; refreshToken: string; user: Omit<UserModel, "passwordHash"> }> {
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+        user = await prisma.user.create({
+            data: {
+                email,
+                passwordHash: "",
+                firstName,
+                lastName,
+                role: Role.Student,
+                isConfirmedEmail: true,
+                oauthProvider: provider,
+                oauthId,
+            },
+        });
+    } else if (!user.oauthId) {
+        user = await prisma.user.update({
+            where: { id: user.id },
+            data: { oauthProvider: provider, oauthId, isConfirmedEmail: true },
+        });
+    }
+
+    const accessToken = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET!, { expiresIn: "15m" });
+    const refreshToken = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_REFRESH_SECRET!, { expiresIn: "7d" });
+
+    await prisma.refreshToken.create({
+        data: {
+            userId: user.id,
+            token: refreshToken,
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+    });
+
+    const { passwordHash: _, ...userWithoutPassword } = user;
+    return { accessToken, refreshToken, user: userWithoutPassword };
+}
+
+async function loginWithGoogle(code: string) {
+    const u = await getGoogleUser(code);
+    return loginWithOAuth("google", u.id, u.email, u.firstName, u.lastName);
+}
+
+async function loginWithItmo(code: string) {
+    const u = await getItmoUser(code);
+    return loginWithOAuth("itmo", u.id, u.email, u.firstName, u.lastName);
+}
+
+async function getMe(userId: string): Promise<Omit<UserModel, "passwordHash"> | null> {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, email: true, firstName: true, lastName: true, role: true, isConfirmedEmail: true, createdAt: true, updatedAt: true, patronymic: true, avatarUrl: true, oauthProvider: true, oauthId: true },
+    });
+    return user as Omit<UserModel, "passwordHash"> | null;
+}
+
 export default {
     register,
     verifyEmail,
     login,
+    loginWithGoogle,
+    loginWithItmo,
+    getMe,
     logout,
     refreshTokens
 };

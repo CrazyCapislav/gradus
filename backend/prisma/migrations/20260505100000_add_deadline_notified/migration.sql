@@ -1,0 +1,2 @@
+ALTER TABLE "stages" ADD COLUMN "soft_deadline_notified" BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE "stages" ADD COLUMN "hard_deadline_notified" BOOLEAN NOT NULL DEFAULT FALSE;
