@@ -21,11 +21,12 @@ services:
   backend:
     build: ./backend
     container_name: gradus-backend
+    env_file:
+      - ./backend/.env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@db:5432/${POSTGRES_DB:-gradus_db}
-      JWT_SECRET: ${JWT_SECRET:-adminjwt}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-adminrefreshjwt}
       PORT: 3000
+      FRONTEND_URL: http://localhost
     ports:
       - '3000:3000'
     depends_on:
