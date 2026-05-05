@@ -1,6 +1,8 @@
 import type { Request, Response } from "express";
 import authService from "../services/auth.service.js";
-import {loginSchema, registerSchema} from "../validation/auth.schemas.js";
+import { loginSchema, registerSchema } from "../validation/auth.schemas.js";
+import { getGoogleAuthUrl } from "../services/google.service.js";
+import { getItmoAuthUrl } from "../services/itmo.service.js";
 
 async function login(req: Request, res: Response): Promise<void> {
     const { email, password } = req.body;
@@ -64,14 +66,14 @@ async function refreshTokens(req: Request, res: Response): Promise<void> {
 }
 
 async function register(req: Request, res: Response): Promise<void> {
-    const { email, password, firstName, lastName, role } = req.body;
-    const parsed = registerSchema.safeParse({ email, password, firstName, lastName, role });
+    const { email, password, firstName, lastName } = req.body;
+    const parsed = registerSchema.safeParse({ email, password, firstName, lastName });
     if (!parsed.success) {
         res.status(400).json({ message: "Validation failed", errors: parsed.error.flatten().fieldErrors });
         return;
     }
     try {
-        const result = await authService.register(email, password, firstName, lastName, role);
+        const result = await authService.register(email, password, firstName, lastName, "Student");
         const userWithoutPassword = { ...result, passwordHash: undefined };
         res.status(201).json({ message: "User registered successfully", user: userWithoutPassword });
     }
@@ -94,10 +96,80 @@ async function verifyEmail(req: Request, res: Response): Promise<void> {
     }
 }
 
+async function googleRedirect(_req: Request, res: Response): Promise<void> {
+    res.redirect(getGoogleAuthUrl());
+}
+
+async function googleCallback(req: Request, res: Response): Promise<void> {
+    const code = req.query.code as string;
+    const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:5173";
+
+    if (!code) {
+        res.redirect(`${frontendUrl}/login?error=google_failed`);
+        return;
+    }
+    try {
+        const result = await authService.loginWithGoogle(code);
+        res.cookie("refreshToken", result.refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+        res.redirect(`${frontendUrl}/auth/callback?token=${result.accessToken}`);
+    } catch (error) {
+        res.redirect(`${frontendUrl}/login?error=google_failed`);
+    }
+}
+
+async function getMe(req: Request, res: Response): Promise<void> {
+    try {
+        const user = await authService.getMe(req.user!.userId);
+        if (!user) {
+            res.status(404).json({ message: "User not found" });
+            return;
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: error instanceof Error ? error.message : "Error fetching user" });
+    }
+}
+
+async function itmoRedirect(_req: Request, res: Response): Promise<void> {
+    res.redirect(getItmoAuthUrl());
+}
+
+async function itmoCallback(req: Request, res: Response): Promise<void> {
+    const code = req.query.code as string;
+    const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:5173";
+
+    if (!code) {
+        res.redirect(`${frontendUrl}/login?error=itmo_failed`);
+        return;
+    }
+    try {
+        const result = await authService.loginWithItmo(code);
+        res.cookie("refreshToken", result.refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+        res.redirect(`${frontendUrl}/auth/callback?token=${result.accessToken}`);
+    } catch (error) {
+        res.redirect(`${frontendUrl}/login?error=itmo_failed`);
+    }
+}
+
 export default {
     login,
     logout,
     refreshTokens,
     register,
-    verifyEmail
+    verifyEmail,
+    googleRedirect,
+    googleCallback,
+    itmoRedirect,
+    itmoCallback,
+    getMe
 };

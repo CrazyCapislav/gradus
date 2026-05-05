@@ -9,8 +9,8 @@ export const logout = async (): Promise<void> => {
   await client.post('/auth/logout');
 };
 
-export const register = async (firstName: string, lastName: string, email: string, password: string, role: "Student" | "Teacher" | "Admin"): Promise<AuthResponse> => {
-  const response = await client.post('/auth/register', { firstName, lastName, email, password, role });
+export const register = async (firstName: string, lastName: string, email: string, password: string): Promise<AuthResponse> => {
+  const response = await client.post('/auth/register', { firstName, lastName, email, password });
   return response.data;
 }
 
@@ -21,4 +21,9 @@ export const refreshToken = async (): Promise<{ accessToken: string }> => {
 
 export const verifyEmail = async (token: string): Promise<void> => {
   await client.get('/auth/verify-email', { params: { token } });
+}
+
+export const getMe = async (): Promise<import('../types').User> => {
+  const response = await client.get('/auth/me');
+  return response.data;
 }

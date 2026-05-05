@@ -10,6 +10,5 @@ export const registerSchema = z.object({
     password: z.string().min(8),
     firstName: z.string().min(1),
     lastName: z.string().min(1),
-    role: z.enum(["Student", "Teacher", "Admin"]),
 });
 
