@@ -1,0 +1,50 @@
+:root {
+  --bg: #0D1117;
+  --surface: #161B22;
+  --card: #1E2430;
+  --border: #30363D;
+  --border-light: #45475A;
+  --text: #CDD6F4;
+  --text-secondary: #8B949E;
+  --text-hint: #6E7681;
+  --accent: #58A6FF;
+  --success: #3FB950;
+  --error: #F85149;
+  --warning: #D29922;
+  --radius: 12px;
+  --radius-sm: 6px;
+
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body{
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+}
+
+a{
+  color: var(--accent);
+  text-decoration: none;
+
+}
+
+h1, h2, h3 {
+  color: var(--text);
+  margin-bottom: 8px;
+}
