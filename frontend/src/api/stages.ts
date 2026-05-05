@@ -6,8 +6,19 @@ export const getStages = async (projectId: string): Promise<Stage[]> => {
     return response.data;
 };
 
-export const createStage = async (projectId: string, title: string, description: string, stageOrder: number = 1): Promise<Stage> => {
-    const response = await client.post(`/projects/${projectId}/stages`, { title, description, stageOrder });
+export const createStage = async (
+    projectId: string,
+    title: string,
+    description: string,
+    stageOrder: number = 1,
+    softDeadline?: string,
+    hardDeadline?: string
+): Promise<Stage> => {
+    const response = await client.post(`/projects/${projectId}/stages`, {
+        title, description, stageOrder,
+        ...(softDeadline && { softDeadline }),
+        ...(hardDeadline && { hardDeadline }),
+    });
     return response.data;
 }
 

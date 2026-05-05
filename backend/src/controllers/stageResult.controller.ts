@@ -8,7 +8,30 @@ async function submitStageResult(req: Request<{stageId: string}>, res: Response)
         const stageResult = await StageResultService.createStageResult(stageId, req.user!.userId, contentText);
         res.status(201).json(stageResult);
     } catch (error) {
-        res.status(500).json({ message: error instanceof Error ? error.message : "Error submitting stage result" });
+        const msg = error instanceof Error ? error.message : "Error submitting stage result";
+        const isUnique = msg.includes("Unique constraint") || msg.includes("P2002");
+        res.status(isUnique ? 409 : 500).json({ message: isUnique ? "Already submitted" : msg });
+    }
+}
+
+async function getMyResult(req: Request<{stageId: string}>, res: Response): Promise<void> {
+    const { stageId } = req.params;
+    try {
+        const result = await StageResultService.getMyResult(stageId, req.user!.userId);
+        res.status(200).json(result ?? null);
+    } catch (error) {
+        res.status(500).json({ message: error instanceof Error ? error.message : "Error fetching result" });
+    }
+}
+
+async function updateMyResult(req: Request<{stageId: string}>, res: Response): Promise<void> {
+    const { stageId } = req.params;
+    const { contentText } = req.body;
+    try {
+        const result = await StageResultService.updateMyResult(stageId, req.user!.userId, contentText);
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ message: error instanceof Error ? error.message : "Error updating result" });
     }
 }
 
@@ -51,6 +74,8 @@ async function updateStageResult(req: Request<{stageResultId: string}>, res: Res
 
 export default {
     submitStageResult,
+    getMyResult,
+    updateMyResult,
     getStageResults,
     getStageResultById,
     updateStageResult

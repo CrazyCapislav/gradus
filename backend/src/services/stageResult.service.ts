@@ -32,6 +32,25 @@ async function createStageResult(stageId: string, studentId: string, contentText
     return result;
 }
 
+async function getMyResult(stageId: string, studentId: string): Promise<StageResultModel | null> {
+    return await prisma.stageResult.findUnique({
+        where: { stageId_studentId: { stageId, studentId } }
+    });
+}
+
+async function updateMyResult(stageId: string, studentId: string, contentText: string): Promise<StageResultModel> {
+    const stage = await prisma.stage.findUnique({
+        where: { id: stageId },
+        select: { hardDeadline: true }
+    });
+    const editedAfterDeadline = stage?.hardDeadline ? new Date() > stage.hardDeadline : false;
+
+    return await prisma.stageResult.update({
+        where: { stageId_studentId: { stageId, studentId } },
+        data: { contentText, isEdited: true, editedAfterDeadline }
+    });
+}
+
 async function getStageResults(stageId: string): Promise<StageResultModel[]> {
     return await prisma.stageResult.findMany({
         where: { stageId }
@@ -54,6 +73,8 @@ async function updateStageResult(stageResultId: string, data: { contentText?: st
 
 export default {
     createStageResult,
+    getMyResult,
+    updateMyResult,
     getStageResults,
     getStageResultById,
     updateStageResult

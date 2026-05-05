@@ -21,7 +21,8 @@ export interface Stage {
     title: string;
     description?: string;
     stageOrder: number;
-    deadline?: string;
+    softDeadline?: string;
+    hardDeadline?: string;
     parentStageId?: string;
     status: "Active" | "SoftDeadlinePassed" | "Closed" | "Graded";
 }
@@ -34,6 +35,9 @@ export interface StageResult {
     status: "Submitted" | "Returned" | "Graded";
     feedback?: string;
     isLate: boolean;
+    isEdited: boolean;
+    editedAfterDeadline: boolean;
+    submittedAt?: string;
 }
 
 export interface AuthResponse {
@@ -44,9 +48,21 @@ export interface AuthResponse {
 export interface Notification {
     id: string;
     userId: string;
+    type: string;
     message: string;
     isRead: boolean;
     createdAt: string;
+    referenceId?: string;
+    referenceType?: string;
+}
+
+export interface StageMaterial {
+    id: string;
+    stageId: string;
+    originalName: string;
+    fileSize: number;
+    mimeType: string;
+    uploadedAt: string;
 }
 
 export interface Grade {

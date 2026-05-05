@@ -1,0 +1,2 @@
+ALTER TABLE "stage_results" ADD COLUMN "is_edited" BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE "stage_results" ADD COLUMN "edited_after_deadline" BOOLEAN NOT NULL DEFAULT FALSE;
