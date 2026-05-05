@@ -1,10 +1,12 @@
-import {Link, useNavigate} from 'react-router-dom';
+import {NavLink, useNavigate} from 'react-router-dom';
 import { useAuth } from '../store/useAuth';
 import { useLang } from '../store/langStore';
+import { useNotifications } from '../store/notificationStore';
 
 function Header() {
     const { user, logout } = useAuth();
     const { t, lang, toggleLang } = useLang();
+    const { unreadCount } = useNotifications();
     const navigate = useNavigate();
 
     function handleLogout() {
@@ -17,10 +19,17 @@ function Header() {
     return (
         <header className="header">
             <nav className="header-nav">
-                <Link to="/projects">{t.projects}</Link>
-                <Link to="/notifications">{t.notifications}</Link>
+                <NavLink to="/projects">{t.projects}</NavLink>
+                <NavLink to="/notifications" style={{position: 'relative'}}>
+                    {t.notifications}
+                    {unreadCount > 0 && (
+                        <span style={{position:'absolute', top:'-6px', right:'-10px', background:'var(--error)', color:'#fff', borderRadius:'50%', fontSize:'11px', fontWeight:700, minWidth:'18px', height:'18px', display:'flex', alignItems:'center', justifyContent:'center', padding:'0 4px', lineHeight:1}}>
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                    )}
+                </NavLink>
                 {user.role === 'Admin' && (
-                    <Link to="/admin">{t.adminPanel}</Link>
+                    <NavLink to="/admin">{t.adminPanel}</NavLink>
                 )}
             </nav>
             <span style={{fontSize: '14px', color: 'var(--text-secondary)'}}>{t.welcome}, {user.firstName}!</span>
@@ -31,4 +40,3 @@ function Header() {
 }
 
 export default Header;
-

@@ -12,12 +12,17 @@ import Header from './components/Header';
 import NotificationsPage from './pages/NotificationsPage';
 import AdminPage from './pages/AdminPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
+import { NotificationProvider } from './store/notificationStore';
+import { ToastProvider } from './components/Toast';
 
 function App() {
   return (
     <LangProvider>
     <AuthProvider>
       <BrowserRouter>
+        <ToastProvider>
+        <NotificationProvider>
         <Header />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
@@ -29,7 +34,10 @@ function App() {
             <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
           </Routes>
+        </NotificationProvider>
+        </ToastProvider>
       </BrowserRouter>
     </AuthProvider>
     </LangProvider>

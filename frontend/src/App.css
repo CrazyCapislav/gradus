@@ -144,10 +144,23 @@
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 
 .header-nav a:hover{
   color: var(--text);
+  border-color: var(--border-light);
+  background: var(--card);
+}
+
+.header-nav a.active{
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(88, 166, 255, 0.08);
 }
 
 .auth-page{
@@ -178,3 +191,35 @@
   color: var(--text-secondary);
   border: 1px solid var(--border);
 }
+
+/* TipTap editor */
+.tiptap { outline: none; }
+.tiptap p { margin: 0 0 8px; }
+.tiptap p:last-child { margin-bottom: 0; }
+.tiptap h2 { font-size: 18px; font-weight: 700; margin: 12px 0 6px; color: var(--text); }
+.tiptap h3 { font-size: 15px; font-weight: 600; margin: 10px 0 4px; color: var(--text); }
+.tiptap strong { font-weight: 700; }
+.tiptap em { font-style: italic; }
+.tiptap s { text-decoration: line-through; }
+.tiptap code { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 5px; border-radius: 4px; font-family: monospace; font-size: 13px; }
+.tiptap blockquote { border-left: 3px solid var(--accent); margin: 8px 0; padding: 4px 12px; color: var(--text-secondary); }
+.tiptap ul, .tiptap ol { padding-left: 20px; margin: 6px 0; }
+.tiptap li { margin: 2px 0; }
+.tiptap hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+.tiptap a { color: var(--accent); text-decoration: underline; }
+.tiptap p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: var(--text-secondary); pointer-events: none; float: left; height: 0; }
+
+/* Rich text display (read-only) */
+.rich-text p { margin: 0 0 8px; }
+.rich-text p:last-child { margin-bottom: 0; }
+.rich-text h2 { font-size: 18px; font-weight: 700; margin: 12px 0 6px; }
+.rich-text h3 { font-size: 15px; font-weight: 600; margin: 10px 0 4px; }
+.rich-text strong { font-weight: 700; }
+.rich-text em { font-style: italic; }
+.rich-text s { text-decoration: line-through; }
+.rich-text code { background: rgba(88,166,255,0.1); color: var(--accent); padding: 1px 5px; border-radius: 4px; font-family: monospace; font-size: 13px; }
+.rich-text blockquote { border-left: 3px solid var(--accent); margin: 8px 0; padding: 4px 12px; color: var(--text-secondary); }
+.rich-text ul, .rich-text ol { padding-left: 20px; margin: 6px 0; }
+.rich-text li { margin: 2px 0; }
+.rich-text hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+.rich-text a { color: var(--accent); text-decoration: underline; }
