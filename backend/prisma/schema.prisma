@@ -113,13 +113,29 @@ model Stage {
   stageOrder Int @map("stage_order")
   softDeadline DateTime? @map("soft_deadline")
   hardDeadline DateTime? @map("hard_deadline")
+  softDeadlineNotified Boolean @default(false) @map("soft_deadline_notified")
+  hardDeadlineNotified Boolean @default(false) @map("hard_deadline_notified")
   status StageStatus @default(Active)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   stageResults StageResult[]
+  stageMaterials StageMaterial[]
 
   @@map("stages")
+}
+
+model StageMaterial {
+  id String @id @db.Uuid @default(uuid())
+  stageId String @db.Uuid @map("stage_id")
+  stage Stage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  originalName String @map("original_name")
+  filePath String @map("file_path")
+  fileSize Int @map("file_size")
+  mimeType String @map("mime_type")
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+
+  @@map("stage_materials")
 }
 
 model StageResult {
@@ -132,6 +148,8 @@ model StageResult {
   feedback String? 
   status StageResultStatus @default(Submitted)
   isLate Boolean @default(false) @map("is_late")
+  isEdited Boolean @default(false) @map("is_edited")
+  editedAfterDeadline Boolean @default(false) @map("edited_after_deadline")
   submittedAt DateTime? @map("submitted_at")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
