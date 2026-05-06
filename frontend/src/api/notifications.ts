@@ -10,3 +10,7 @@ export const getNotifications = async (): Promise<Notification[]> => {
 export const markAsRead = async (id: string): Promise<void> => {
     await client.put(`/notifications/${id}/read`);
 };
+
+export const deleteNotification = async (id: string): Promise<void> => {
+    await client.delete(`/notifications/${id}`);
+};

@@ -28,8 +28,19 @@ async function markAllAsRead(req: Request, res: Response): Promise<void> {
     }
 }
 
+async function deleteNotification(req: Request<{ id: string }>, res: Response): Promise<void> {
+    const { id } = req.params;
+    try {
+        await notificationService.deleteNotification(id, req.user!.userId);
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ message: error instanceof Error ? error.message : "Error deleting notification" });
+    }
+}
+
 export default {
     getNotifications,
     markAsRead,
-    markAllAsRead
+    markAllAsRead,
+    deleteNotification
 };

@@ -32,8 +32,15 @@ async function markAllAsRead(userId: string): Promise<void> {
     });
 }
 
+async function deleteNotification(notificationId: string, userId: string): Promise<void> {
+    await prisma.notification.deleteMany({
+        where: { id: notificationId, userId }
+    });
+}
+
 export default {
     getNotifications,
     markAsRead,
-    markAllAsRead
+    markAllAsRead,
+    deleteNotification
 };
