@@ -40,6 +40,7 @@ services:
       context: ./frontend
       args:
         VITE_API_URL: http://localhost:3000/api
+        VITE_ITMO_ENABLED: "false"
     container_name: gradus-frontend
     ports:
       - '80:80'

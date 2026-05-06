@@ -7,6 +7,7 @@ import { useLang } from "../store/langStore";
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') ?? 'http://localhost:3000';
 const GOOGLE_AUTH_URL = `${API_BASE}/api/auth/google`;
 const ITMO_AUTH_URL = `${API_BASE}/api/auth/itmo`;
+const ITMO_ENABLED = import.meta.env.VITE_ITMO_ENABLED === 'true';
 
 function LoginPage() {
     const { setUser, setAccessToken } = useAuth();
@@ -75,15 +76,17 @@ function LoginPage() {
                     </button>
                 </a>
 
-                <a href={ITMO_AUTH_URL} style={{display: 'block', textDecoration: 'none', marginTop: '8px'}}>
-                    <button className="btn btn-secondary" type="button" style={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'}}>
-                        <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
-                            <rect width="32" height="32" rx="6" fill="#0033A0"/>
-                            <text x="16" y="22" textAnchor="middle" fill="white" fontSize="13" fontWeight="bold" fontFamily="Arial">IT</text>
-                        </svg>
-                        {t.loginWithItmo}
-                    </button>
-                </a>
+                {ITMO_ENABLED && (
+                    <a href={ITMO_AUTH_URL} style={{display: 'block', textDecoration: 'none', marginTop: '8px'}}>
+                        <button className="btn btn-secondary" type="button" style={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'}}>
+                            <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
+                                <rect width="32" height="32" rx="6" fill="#0033A0"/>
+                                <text x="16" y="22" textAnchor="middle" fill="white" fontSize="13" fontWeight="bold" fontFamily="Arial">IT</text>
+                            </svg>
+                            {t.loginWithItmo}
+                        </button>
+                    </a>
+                )}
 
                 <p style={{textAlign: 'center', marginTop: '16px', fontSize: '14px', color: 'var(--text-secondary)'}}>
                     {t.noAccount} <Link to="/register">{t.registerHere}</Link>

@@ -5,6 +5,8 @@ RUN npm ci
 COPY . .
 ARG VITE_API_URL=http://localhost:3000/api
 ENV VITE_API_URL=$VITE_API_URL
+ARG VITE_ITMO_ENABLED=false
+ENV VITE_ITMO_ENABLED=$VITE_ITMO_ENABLED
 RUN npm run build
 
 FROM nginx:alpine
