@@ -7,6 +7,7 @@ const router = express.Router({ mergeParams: true });
 
 router.post("/", authenticate, upload.single("file"), fileAttachmentController.uploadFile);
 router.get("/", authenticate, fileAttachmentController.getFileAttachments);
+router.get("/:fileAttachmentId/download", authenticate, fileAttachmentController.downloadFileAttachment);
 router.delete("/:fileAttachmentId", authenticate, fileAttachmentController.deleteFileAttachment);
 
 export default router;

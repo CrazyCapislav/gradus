@@ -32,9 +32,10 @@ async function createStageResult(stageId: string, studentId: string, contentText
     return result;
 }
 
-async function getMyResult(stageId: string, studentId: string): Promise<StageResultModel | null> {
+async function getMyResult(stageId: string, studentId: string) {
     return await prisma.stageResult.findUnique({
-        where: { stageId_studentId: { stageId, studentId } }
+        where: { stageId_studentId: { stageId, studentId } },
+        include: { fileAttachments: true }
     });
 }
 
@@ -51,9 +52,10 @@ async function updateMyResult(stageId: string, studentId: string, contentText: s
     });
 }
 
-async function getStageResults(stageId: string): Promise<StageResultModel[]> {
+async function getStageResults(stageId: string) {
     return await prisma.stageResult.findMany({
-        where: { stageId }
+        where: { stageId },
+        include: { fileAttachments: true }
     });
 }
 

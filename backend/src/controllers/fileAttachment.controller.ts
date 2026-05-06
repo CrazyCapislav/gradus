@@ -35,8 +35,23 @@ async function deleteFileAttachment(req: Request<{ fileAttachmentId: string }>, 
     }
 }
 
+async function downloadFileAttachment(req: Request<{ fileAttachmentId: string }>, res: Response): Promise<void> {
+    const { fileAttachmentId } = req.params;
+    try {
+        const attachment = await fileAttachmentService.getFileAttachmentById(fileAttachmentId);
+        if (!attachment) {
+            res.status(404).json({ message: "File not found" });
+            return;
+        }
+        res.download(attachment.filePath, attachment.originalName);
+    } catch (error) {
+        res.status(500).json({ message: error instanceof Error ? error.message : "Error downloading file" });
+    }
+}
+
 export default {
     uploadFile,
     getFileAttachments,
+    downloadFileAttachment,
     deleteFileAttachment,
 };

@@ -27,6 +27,15 @@ export interface Stage {
     status: "Active" | "SoftDeadlinePassed" | "Closed" | "Graded";
 }
 
+export interface FileAttachment {
+    id: string;
+    stageResultId: string;
+    originalName: string;
+    fileSize: number;
+    mimeType: string;
+    uploadedAt: string;
+}
+
 export interface StageResult {
     id: string;
     stageId: string;
@@ -38,6 +47,7 @@ export interface StageResult {
     isEdited: boolean;
     editedAfterDeadline: boolean;
     submittedAt?: string;
+    fileAttachments?: FileAttachment[];
 }
 
 export interface AuthResponse {

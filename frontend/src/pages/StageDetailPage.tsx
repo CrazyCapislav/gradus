@@ -7,7 +7,7 @@ import {useAuth} from '../store/useAuth';
 import { useLang } from '../store/langStore';
 import { submitStageResult, getStageResults, getMyResult, updateMyResult } from '../api/stageResults';
 import { gradeStageResult } from '../api/grades';
-import { uploadFile } from '../api/fileAttachments';
+import { uploadFile, downloadAttachment } from '../api/fileAttachments';
 import { getMaterials, uploadMaterial, deleteMaterial, downloadMaterial } from '../api/stageMaterials';
 import RichTextEditor from '../components/RichTextEditor';
 import RichTextDisplay from '../components/RichTextDisplay';
@@ -232,6 +232,17 @@ function StageDetailPage() {
                                 )}
                             </div>
                             <RichTextDisplay html={myResult.contentText ?? ''} style={{fontSize: '14px'}} />
+                            {myResult.fileAttachments && myResult.fileAttachments.length > 0 && (
+                                <div style={{display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px'}}>
+                                    {myResult.fileAttachments.map(f => (
+                                        <button key={f.id} className="btn btn-ghost btn-sm" style={{display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', background: 'rgba(88,166,255,0.06)', border: '1px solid rgba(88,166,255,0.2)', borderRadius: '999px', fontSize: '12px', color: 'var(--accent)'}}
+                                            onClick={() => downloadAttachment(myResult.id, f.id, f.originalName)}>
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                            {f.originalName}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </>
                     )}
 
@@ -309,6 +320,17 @@ function StageDetailPage() {
                                 )}
                             </div>
                             <RichTextDisplay html={result.contentText ?? ''} style={{fontSize: '14px'}} />
+                            {result.fileAttachments && result.fileAttachments.length > 0 && (
+                                <div style={{display: 'flex', flexWrap: 'wrap', gap: '6px', margin: '8px 0'}}>
+                                    {result.fileAttachments.map(f => (
+                                        <button key={f.id} className="btn btn-ghost btn-sm" style={{display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', background: 'rgba(88,166,255,0.06)', border: '1px solid rgba(88,166,255,0.2)', borderRadius: '999px', fontSize: '12px', color: 'var(--accent)'}}
+                                            onClick={() => downloadAttachment(result.id, f.id, f.originalName)}>
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                            {f.originalName}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                             <button className="btn btn-secondary btn-sm" onClick={() => setSelectedResultId(result.id)}>{t.grade}</button>
                             {selectedResultId === result.id && (
                                 <div style={{marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px'}}>

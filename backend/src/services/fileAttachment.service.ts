@@ -14,6 +14,10 @@ async function saveFileAttachment(file: Express.Multer.File, stageResultId: stri
     });
 }
 
+async function getFileAttachmentById(id: string): Promise<FileAttachmentModel | null> {
+    return await prisma.fileAttachment.findUnique({ where: { id } });
+}
+
 async function getFileAttachments(stageResultId: string): Promise<FileAttachmentModel[]> {
     return await prisma.fileAttachment.findMany({
         where: { stageResultId }
@@ -38,6 +42,7 @@ async function deleteFileAttachment(fileAttachmentId: string): Promise<void> {
 
 export default {
     saveFileAttachment,
+    getFileAttachmentById,
     getFileAttachments,
     deleteFileAttachment,
 };
