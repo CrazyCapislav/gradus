@@ -117,7 +117,7 @@ function ProjectDetailPage() {
                                     <p style={{fontWeight: 600, margin: 0}}>{u.firstName} {u.lastName}</p>
                                     <p style={{fontSize: '13px', color: 'var(--text-secondary)', margin: 0}}>{u.email}</p>
                                 </div>
-                                <button className="btn btn-primary" onClick={() => handleAddMember(u.id)} style={{width: '32px', height: '32px', padding: 0, borderRadius: '50%', flexShrink: 0, fontSize: '20px', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>+</button>
+                                <button className="btn btn-primary" onClick={() => handleAddMember(u.id)} style={{width: '32px', height: '32px', padding: 0, borderRadius: '6px', flexShrink: 0, fontSize: '20px', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>+</button>
                             </div>
                         ))}
                         {filteredUsers.length === 0 && (

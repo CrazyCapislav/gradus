@@ -10,8 +10,8 @@ async function createStage(req: Request<{projectId: string}>, res: Response): Pr
             stageOrder,
             description,
             parentStageId,
-            softDeadline: softDeadline ? new Date(softDeadline) : undefined,
-            hardDeadline: hardDeadline ? new Date(hardDeadline) : undefined,
+            ...(softDeadline ? { softDeadline: new Date(softDeadline) } : {}),
+            ...(hardDeadline ? { hardDeadline: new Date(hardDeadline) } : {}),
         });
         res.status(201).json(stage);
     } catch (error) {
@@ -48,8 +48,8 @@ async function updateStage(req: Request<{stageId: string}>, res: Response): Prom
             title,
             description,
             status,
-            softDeadline: softDeadline ? new Date(softDeadline) : undefined,
-            hardDeadline: hardDeadline ? new Date(hardDeadline) : undefined,
+            ...(softDeadline ? { softDeadline: new Date(softDeadline) } : {}),
+            ...(hardDeadline ? { hardDeadline: new Date(hardDeadline) } : {}),
         });
         res.status(200).json(stage);
     } catch (error) {
