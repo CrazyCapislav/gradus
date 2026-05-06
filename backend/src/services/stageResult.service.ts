@@ -55,7 +55,10 @@ async function updateMyResult(stageId: string, studentId: string, contentText: s
 async function getStageResults(stageId: string) {
     return await prisma.stageResult.findMany({
         where: { stageId },
-        include: { fileAttachments: true }
+        include: {
+            fileAttachments: true,
+            student: { select: { id: true, firstName: true, lastName: true, email: true } }
+        }
     });
 }
 

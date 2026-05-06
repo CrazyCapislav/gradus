@@ -302,6 +302,17 @@ function StageDetailPage() {
                     <h2>{t.submittedResults}</h2>
                     {results.map(result => (
                         <div key={result.id} style={{borderBottom: '1px solid var(--border)', padding: '16px 0'}}>
+                            {result.student && (
+                                <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px'}}>
+                                    <div style={{width: '30px', height: '30px', borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 600, color: '#fff', flexShrink: 0}}>
+                                        {result.student.firstName[0]}{result.student.lastName[0]}
+                                    </div>
+                                    <div>
+                                        <div style={{fontSize: '14px', fontWeight: 500}}>{result.student.firstName} {result.student.lastName}</div>
+                                        <div style={{fontSize: '12px', color: 'var(--text-secondary)'}}>{result.student.email}</div>
+                                    </div>
+                                </div>
+                            )}
                             <div style={{display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: (result.isLate || result.isEdited || result.editedAfterDeadline) ? '10px' : '0'}}>
                                 {result.isLate && (
                                     <span style={{display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(248,81,73,0.10)', border: '1px solid var(--error)', borderRadius: '999px', padding: '3px 10px', fontSize: '12px', color: 'var(--error)'}}>

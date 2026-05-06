@@ -48,6 +48,7 @@ export interface StageResult {
     editedAfterDeadline: boolean;
     submittedAt?: string;
     fileAttachments?: FileAttachment[];
+    student?: { id: string; firstName: string; lastName: string; email: string };
 }
 
 export interface AuthResponse {
