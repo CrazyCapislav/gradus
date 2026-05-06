@@ -19,6 +19,14 @@ export const deleteMaterial = async (projectId: string, stageId: string, materia
     await client.delete(`/projects/${projectId}/stages/${stageId}/materials/${materialId}`);
 };
 
-export const getMaterialDownloadUrl = (projectId: string, stageId: string, materialId: string): string => {
-    return `/api/projects/${projectId}/stages/${stageId}/materials/${materialId}/download`;
+export const downloadMaterial = async (projectId: string, stageId: string, materialId: string, fileName: string): Promise<void> => {
+    const response = await client.get(`/projects/${projectId}/stages/${stageId}/materials/${materialId}/download`, {
+        responseType: "blob",
+    });
+    const url = URL.createObjectURL(response.data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
 };

@@ -8,7 +8,7 @@ import { useLang } from '../store/langStore';
 import { submitStageResult, getStageResults, getMyResult, updateMyResult } from '../api/stageResults';
 import { gradeStageResult } from '../api/grades';
 import { uploadFile } from '../api/fileAttachments';
-import { getMaterials, uploadMaterial, deleteMaterial } from '../api/stageMaterials';
+import { getMaterials, uploadMaterial, deleteMaterial, downloadMaterial } from '../api/stageMaterials';
 import RichTextEditor from '../components/RichTextEditor';
 import RichTextDisplay from '../components/RichTextDisplay';
 import { useToast } from '../components/Toast';
@@ -184,13 +184,13 @@ function StageDetailPage() {
                                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
                                         <polyline points="14,2 14,8 20,8" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
                                     </svg>
-                                    <a
-                                        href={`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/projects/${projectId}/stages/${stageId}/materials/${m.id}/download`}
-                                        style={{fontSize: '14px', color: 'var(--accent)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}
-                                        download
+                                    <button
+                                        className="btn btn-ghost btn-sm"
+                                        style={{fontSize: '14px', color: 'var(--accent)', padding: 0, background: 'none', border: 'none', cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left'}}
+                                        onClick={() => downloadMaterial(projectId!, stageId!, m.id, m.originalName)}
                                     >
                                         {m.originalName}
-                                    </a>
+                                    </button>
                                 </div>
                                 {isTeacher && (
                                     <button className="btn btn-ghost btn-sm" style={{color: 'var(--error)', flexShrink: 0}} onClick={() => handleDeleteMaterial(m.id)}>
