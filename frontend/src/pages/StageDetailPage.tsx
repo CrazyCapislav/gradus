@@ -7,7 +7,7 @@ import {useAuth} from '../store/useAuth';
 import { useLang } from '../store/langStore';
 import { submitStageResult, getStageResults, getMyResult, updateMyResult } from '../api/stageResults';
 import { gradeStageResult } from '../api/grades';
-import { uploadFile, downloadAttachment } from '../api/fileAttachments';
+import { uploadFile, downloadAttachment, deleteAttachment } from '../api/fileAttachments';
 import { getMaterials, uploadMaterial, deleteMaterial, downloadMaterial } from '../api/stageMaterials';
 import RichTextEditor from '../components/RichTextEditor';
 import RichTextDisplay from '../components/RichTextDisplay';
@@ -106,11 +106,30 @@ function StageDetailPage() {
         if (!projectId || !stageId) return;
         updateMyResult(projectId, stageId, editText)
             .then((updated) => {
-                setMyResult(updated);
+                setMyResult(prev => ({ ...updated, fileAttachments: prev?.fileAttachments }));
                 setIsEditing(false);
                 showToast(t.saveChanges + ' ✓');
             })
             .catch((err) => { showToast(err.message, 'error'); });
+    }
+
+    function handleDeleteAttachment(fileId: string) {
+        if (!myResult) return;
+        deleteAttachment(myResult.id, fileId)
+            .then(() => {
+                setMyResult(prev => prev ? { ...prev, fileAttachments: prev.fileAttachments?.filter(f => f.id !== fileId) } : prev);
+            })
+            .catch((err) => { showToast(err.message, 'error'); });
+    }
+
+    function handleAddAttachment(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file || !myResult) return;
+        uploadFile(myResult.id, file)
+            .then(() => getMyResult(projectId!, stageId!))
+            .then(updated => { if (updated) setMyResult(updated); })
+            .catch((err) => { showToast(err.message, 'error'); });
+        e.target.value = '';
     }
 
     function handleGrade(resultId: string) {
@@ -249,9 +268,26 @@ function StageDetailPage() {
                     {myResult && isEditing && (
                         <>
                             <RichTextEditor value={editText} onChange={setEditText} placeholder="Введите текст ответа..." minHeight="150px" />
-                            <div style={{display: 'flex', gap: '8px', marginTop: '12px'}}>
+                            {myResult.fileAttachments && myResult.fileAttachments.length > 0 && (
+                                <div style={{display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '12px'}}>
+                                    {myResult.fileAttachments.map(f => (
+                                        <span key={f.id} style={{display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px 3px 10px', background: 'rgba(88,166,255,0.06)', border: '1px solid rgba(88,166,255,0.2)', borderRadius: '999px', fontSize: '12px', color: 'var(--accent)'}}>
+                                            {f.originalName}
+                                            <button onClick={() => handleDeleteAttachment(f.id)} style={{background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', color: 'var(--text-secondary)', lineHeight: 1, fontSize: '14px'}} title={t.delete}>×</button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                            <div style={{display: 'flex', gap: '8px', marginTop: '12px', alignItems: 'center'}}>
                                 <button className="btn btn-primary btn-sm" onClick={handleSaveEdit}>{t.saveChanges}</button>
                                 <button className="btn btn-secondary btn-sm" onClick={() => setIsEditing(false)}>{t.cancelEdit}</button>
+                                <label style={{display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '13px', color: 'var(--text-secondary)'}}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                                    </svg>
+                                    {t.attachments}
+                                    <input type="file" style={{display: 'none'}} onChange={handleAddAttachment} />
+                                </label>
                             </div>
                         </>
                     )}

@@ -8,6 +8,10 @@ export const uploadFile = async (stageResultId: string, file: File): Promise<voi
     });
 }
 
+export const deleteAttachment = async (stageResultId: string, fileAttachmentId: string): Promise<void> => {
+    await client.delete(`/results/${stageResultId}/files/${fileAttachmentId}`);
+};
+
 export const downloadAttachment = async (stageResultId: string, fileAttachmentId: string, fileName: string): Promise<void> => {
     const response = await client.get(`/results/${stageResultId}/files/${fileAttachmentId}/download`, {
         responseType: 'blob',
