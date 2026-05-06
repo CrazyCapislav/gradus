@@ -5,9 +5,17 @@ async function createStage(req: Request<{projectId: string}>, res: Response): Pr
     const { projectId } = req.params;
     const { title, stageOrder, softDeadline, hardDeadline, parentStageId, description } = req.body;
     try {
-        const stage = await StageService.createStage(projectId, { title, stageOrder, softDeadline, hardDeadline, parentStageId, description });
+        const stage = await StageService.createStage(projectId, {
+            title,
+            stageOrder,
+            description,
+            parentStageId,
+            softDeadline: softDeadline ? new Date(softDeadline) : undefined,
+            hardDeadline: hardDeadline ? new Date(hardDeadline) : undefined,
+        });
         res.status(201).json(stage);
     } catch (error) {
+        console.error("[createStage]", error);
         res.status(500).json({ message: error instanceof Error ? error.message : "Error creating stage" });
     }
 }
@@ -36,7 +44,13 @@ async function updateStage(req: Request<{stageId: string}>, res: Response): Prom
     const { stageId } = req.params;
     const { title, description, softDeadline, hardDeadline, status } = req.body;
     try {
-        const stage = await StageService.updateStage(stageId, { title, description, softDeadline, hardDeadline, status });
+        const stage = await StageService.updateStage(stageId, {
+            title,
+            description,
+            status,
+            softDeadline: softDeadline ? new Date(softDeadline) : undefined,
+            hardDeadline: hardDeadline ? new Date(hardDeadline) : undefined,
+        });
         res.status(200).json(stage);
     } catch (error) {
         res.status(500).json({ message: error instanceof Error ? error.message : "Error updating stage" });
