@@ -26,6 +26,7 @@ function StageDetailPage() {
     const { showToast } = useToast();
     const [selectedResultId, setSelectedResultId] = useState<string | null>(null);
     const [score, setScore] = useState<number>(0);
+    const [maxScore, setMaxScore] = useState<number>(100);
     const [feedback, setFeedback] = useState<string>('');
     const [files, setFiles] = useState<FileList | null>(null);
     const [materials, setMaterials] = useState<StageMaterial[]>([]);
@@ -133,7 +134,7 @@ function StageDetailPage() {
     }
 
     function handleGrade(resultId: string) {
-        gradeStageResult(resultId, score, feedback)
+        gradeStageResult(resultId, score, maxScore, feedback)
             .then(() => {
                 showToast(t.toastGradeSubmitted, 'success');
                 setSelectedResultId(null);
@@ -381,7 +382,10 @@ function StageDetailPage() {
                             <button className="btn btn-secondary btn-sm" onClick={() => setSelectedResultId(result.id)}>{t.grade}</button>
                             {selectedResultId === result.id && (
                                 <div style={{marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                                    <input className="input" type="number" value={score} onChange={(e) => setScore(Number(e.target.value))} placeholder={t.score} />
+                                    <div style={{display: 'flex', gap: '8px'}}>
+                                        <input className="input" type="number" min={0} value={score} onChange={(e) => setScore(Number(e.target.value))} placeholder={t.score} style={{flex: 1}} />
+                                        <input className="input" type="number" min={1} value={maxScore} onChange={(e) => setMaxScore(Number(e.target.value))} placeholder={t.maxScore} style={{flex: 1}} />
+                                    </div>
                                     <textarea className="input" value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder={t.feedback} />
                                     <button className="btn btn-primary btn-sm" onClick={() => handleGrade(result.id)}>{t.submitGrade}</button>
                                 </div>
