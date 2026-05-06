@@ -149,6 +149,7 @@ model StageResult {
   status StageResultStatus @default(Submitted)
   isLate Boolean @default(false) @map("is_late")
   isEdited Boolean @default(false) @map("is_edited")
+  editedAt DateTime? @map("edited_at")
   editedAfterDeadline Boolean @default(false) @map("edited_after_deadline")
   submittedAt DateTime? @map("submitted_at")
   createdAt DateTime @default(now()) @map("created_at")

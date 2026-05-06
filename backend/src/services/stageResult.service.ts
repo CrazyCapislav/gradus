@@ -48,7 +48,7 @@ async function updateMyResult(stageId: string, studentId: string, contentText: s
 
     return await prisma.stageResult.update({
         where: { stageId_studentId: { stageId, studentId } },
-        data: { contentText, isEdited: true, editedAfterDeadline }
+        data: { contentText, isEdited: true, editedAt: new Date(), editedAfterDeadline }
     });
 }
 

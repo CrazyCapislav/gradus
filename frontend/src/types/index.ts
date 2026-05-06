@@ -45,6 +45,7 @@ export interface StageResult {
     feedback?: string;
     isLate: boolean;
     isEdited: boolean;
+    editedAt?: string;
     editedAfterDeadline: boolean;
     submittedAt?: string;
     fileAttachments?: FileAttachment[];

@@ -241,7 +241,7 @@ function StageDetailPage() {
                                 )}
                                 {myResult.isEdited && (
                                     <span style={{display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', background: 'rgba(88,166,255,0.08)', border: '1px solid rgba(88,166,255,0.25)', borderRadius: '999px', fontSize: '12px', color: 'var(--accent)'}}>
-                                        ✎ {t.edited}
+                                        ✎ {t.edited}{myResult.editedAt ? ': ' + new Date(myResult.editedAt).toLocaleString('ru') : ''}
                                     </span>
                                 )}
                                 {myResult.editedAfterDeadline && (
@@ -357,7 +357,7 @@ function StageDetailPage() {
                                 )}
                                 {result.isEdited && (
                                     <span style={{display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(88,166,255,0.08)', border: '1px solid rgba(88,166,255,0.25)', borderRadius: '999px', padding: '3px 10px', fontSize: '12px', color: 'var(--accent)'}}>
-                                        ✎ {t.edited}
+                                        ✎ {t.edited}{result.editedAt ? ': ' + new Date(result.editedAt).toLocaleString('ru') : ''}
                                     </span>
                                 )}
                                 {result.editedAfterDeadline && (
