@@ -91,7 +91,7 @@ function StageDetailPage() {
                 .then(() => {
                     setContentText('');
                     setFiles(null);
-                    showToast(t.submitResult + ' ✓');
+                    showToast(t.toastResultSubmitted, 'success');
                 })
                 .catch((err) => { setError(err.message); showToast(err.message, 'error'); });
         }
@@ -108,7 +108,7 @@ function StageDetailPage() {
             .then((updated) => {
                 setMyResult(prev => ({ ...updated, fileAttachments: prev?.fileAttachments }));
                 setIsEditing(false);
-                showToast(t.saveChanges + ' ✓');
+                showToast(t.toastResultSaved, 'success');
             })
             .catch((err) => { showToast(err.message, 'error'); });
     }
@@ -135,7 +135,7 @@ function StageDetailPage() {
     function handleGrade(resultId: string) {
         gradeStageResult(resultId, score, feedback)
             .then(() => {
-                showToast(t.submitGrade + ' ✓');
+                showToast(t.toastGradeSubmitted, 'success');
                 setSelectedResultId(null);
             })
             .catch((err) => { setError(err.message); showToast(err.message, 'error'); });
