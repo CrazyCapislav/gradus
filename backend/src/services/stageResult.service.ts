@@ -23,7 +23,7 @@ async function createStageResult(stageId: string, studentId: string, contentText
             data: {
                 userId: stage.project.teacherId,
                 type: "StageSubmitted",
-                message: `New stage result submitted for project "${stage.project.title}".`,
+                message: JSON.stringify({ key: "notif_stageSubmitted", params: { projectTitle: stage.project.title } }),
                 referenceId: result.id,
                 referenceType: "StageResult"
             }

@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/useAuth';
-import { useLang } from '../store/langStore';
+import { useLang, formatNotif } from '../store/langStore';
 import type { Notification } from '../types';
 import { getNotifications, markAsRead, deleteNotification } from '../api/notifications';
 import { acceptInvitation, declineInvitation } from '../api/projects';
@@ -98,7 +98,7 @@ function NotificationsPage() {
                             {!notification.isRead && (
                                 <div style={{width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent)', flexShrink: 0}} />
                             )}
-                            <span style={{fontSize: '14px', wordBreak: 'break-word'}}>{notification.message}</span>
+                            <span style={{fontSize: '14px', wordBreak: 'break-word'}}>{formatNotif(notification.message, t)}</span>
                         </div>
                         <div style={{display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center'}}>
                             {notification.type === 'project_invitation' && !notification.isRead ? (

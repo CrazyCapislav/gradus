@@ -60,7 +60,7 @@ async function inviteUser(projectId: string, invitedUserId: string, teacherName:
         data: {
             userId: invitedUserId,
             type: "project_invitation",
-            message: `${teacherName} приглашает вас в проект «${projectTitle}»`,
+            message: JSON.stringify({ key: "notif_projectInvitation", params: { teacherName, projectTitle } }),
             referenceId: projectId,
             referenceType: "Project",
         }

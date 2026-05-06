@@ -31,8 +31,8 @@ async function notifyDeadline(type: "soft" | "hard") {
         for (const recipient of recipients) {
             const isTeacher = recipient.id === project.teacherId;
             const message = type === "soft"
-                ? `Мягкий дедлайн этапа «${stage.title}» прошёл`
-                : `Жёсткий дедлайн этапа «${stage.title}» прошёл`;
+                ? JSON.stringify({ key: "notif_softDeadlinePassed", params: { stageTitle: stage.title } })
+                : JSON.stringify({ key: "notif_hardDeadlinePassed", params: { stageTitle: stage.title } });
 
             await prisma.notification.create({
                 data: {

@@ -19,7 +19,7 @@ async function createGrade(stageResultId: string, score: number, maxScore: numbe
             data: {
                 userId: stageResult.studentId,
                 type: "GradeReceived",
-                message: `Your submission for stage "${stageResult.stage.title}" has been graded: ${score}/${maxScore}.`,
+                message: JSON.stringify({ key: "notif_gradeReceived", params: { stageTitle: stageResult.stage.title, score, maxScore } }),
                 referenceId: grade.id,
                 referenceType: "Grade"
             }

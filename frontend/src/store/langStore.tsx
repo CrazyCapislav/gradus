@@ -93,6 +93,11 @@ const translations = {
         toastResultSubmitted: "Your answer has been submitted",
         toastResultSaved: "Your answer has been saved",
         toastGradeSubmitted: "Grade submitted",
+        notif_stageSubmitted: "New submission in project «{projectTitle}»",
+        notif_gradeReceived: "Your work for stage «{stageTitle}» has been graded: {score}/{maxScore}",
+        notif_projectInvitation: "{teacherName} invited you to project «{projectTitle}»",
+        notif_softDeadlinePassed: "Soft deadline for stage «{stageTitle}» has passed",
+        notif_hardDeadlinePassed: "Hard deadline for stage «{stageTitle}» has passed",
         loginWithGoogle: "Continue with Google",
         loginWithItmo: "Continue with ITMO ID",
         or: "or",
@@ -182,6 +187,11 @@ const translations = {
         toastResultSubmitted: "Ваш ответ отправлен",
         toastResultSaved: "Ваш ответ сохранён",
         toastGradeSubmitted: "Оценка выставлена",
+        notif_stageSubmitted: "Новый ответ в проекте «{projectTitle}»",
+        notif_gradeReceived: "Ваша работа по этапу «{stageTitle}» оценена: {score}/{maxScore}",
+        notif_projectInvitation: "{teacherName} приглашает вас в проект «{projectTitle}»",
+        notif_softDeadlinePassed: "Мягкий дедлайн этапа «{stageTitle}» прошёл",
+        notif_hardDeadlinePassed: "Жёсткий дедлайн этапа «{stageTitle}» прошёл",
         loginWithGoogle: "Войти через Google",
         loginWithItmo: "Войти через ITMO ID",
         or: "или",
@@ -198,6 +208,20 @@ const translations = {
 };
 
 type Translations = typeof translations.en;
+
+export function formatNotif(message: string, t: Translations): string {
+    try {
+        const { key, params } = JSON.parse(message) as { key: keyof Translations; params: Record<string, string | number> };
+        let text = t[key] as string | undefined;
+        if (!text) return message;
+        for (const [k, v] of Object.entries(params)) {
+            text = text.replace(`{${k}}`, String(v));
+        }
+        return text;
+    } catch {
+        return message;
+    }
+}
 
 const LangContext = createContext<{
     lang: Lang;
