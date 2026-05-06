@@ -5,7 +5,7 @@ import fs from "fs/promises";
 async function saveFileAttachment(file: Express.Multer.File, stageResultId: string): Promise<FileAttachmentModel> {
     return await prisma.fileAttachment.create({
         data: {
-            originalName: file.originalname,
+            originalName: Buffer.from(file.originalname, 'latin1').toString('utf8'),
             filePath: file.path,
             fileSize: file.size,
             stageResultId,

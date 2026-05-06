@@ -6,7 +6,7 @@ async function uploadMaterial(file: Express.Multer.File, stageId: string): Promi
     return await prisma.stageMaterial.create({
         data: {
             stageId,
-            originalName: file.originalname,
+            originalName: Buffer.from(file.originalname, 'latin1').toString('utf8'),
             filePath: file.path,
             fileSize: file.size,
             mimeType: file.mimetype,
