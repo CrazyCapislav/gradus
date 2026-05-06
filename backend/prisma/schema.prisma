@@ -91,9 +91,9 @@ model RefreshToken {
 
 model ProjectMember {
   id String @id @db.Uuid @default(uuid())
-  projectId String @db.Uuid @map("project_id") 
-  project Project @relation(fields: [projectId], references: [id])
-  userId String @db.Uuid @map("user_id") 
+  projectId String @db.Uuid @map("project_id")
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId String @db.Uuid @map("user_id")
   user User @relation(fields: [userId], references: [id])
   addedAt DateTime @default(now()) @map("added_at")
 
@@ -104,9 +104,9 @@ model ProjectMember {
 model Stage {
   id String @id @db.Uuid @default(uuid())
   projectId String @db.Uuid @map("project_id")
-  project Project @relation(fields: [projectId], references: [id])
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   parentStageId String? @db.Uuid @map("parent_stage_id")
-  parentStage Stage? @relation("SubStages", fields: [parentStageId], references: [id])
+  parentStage Stage? @relation("SubStages", fields: [parentStageId], references: [id], onDelete: SetNull)
   subStages Stage[] @relation("SubStages")
   title String
   description String?
@@ -141,7 +141,7 @@ model StageMaterial {
 model StageResult {
   id String @id @db.Uuid @default(uuid())
   stageId String @db.Uuid @map("stage_id")
-  stage Stage @relation(fields: [stageId], references: [id])
+  stage Stage @relation(fields: [stageId], references: [id], onDelete: Cascade)
   studentId String @db.Uuid @map("student_id")
   student User @relation(fields: [studentId], references: [id])
   contentText String? @map("content_text")
@@ -164,7 +164,7 @@ model StageResult {
 model Grade {
   id String @id @db.Uuid @default(uuid())
   stageResultId String @db.Uuid @unique @map("stage_result_id")
-  stageResult StageResult @relation(fields: [stageResultId], references: [id])
+  stageResult StageResult @relation(fields: [stageResultId], references: [id], onDelete: Cascade)
   score Decimal @db.Decimal(5, 2)
   maxScore Decimal @map("max_score") @db.Decimal(5, 2)
   feedback String? 
@@ -178,7 +178,7 @@ model Grade {
 model FileAttachment {
   id String @id @db.Uuid @default(uuid())
   stageResultId String @db.Uuid @map("stage_result_id")
-  stageResult StageResult @relation(fields: [stageResultId], references: [id])
+  stageResult StageResult @relation(fields: [stageResultId], references: [id], onDelete: Cascade)
   originalName String @map("original_name")
   filePath String @map("file_path")
   fileSize Int @map("file_size")
@@ -205,7 +205,7 @@ model Notification {
 model FinalGrade {
   id String @id @db.Uuid @default(uuid())
   projectId String @db.Uuid @map("project_id")
-  project Project @relation(fields: [projectId], references: [id])
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   studentId String @db.Uuid @map("student_id")
   student User @relation("FinalGradesReceived", fields: [studentId], references: [id])
   score Decimal @db.Decimal(5, 2)
