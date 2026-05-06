@@ -127,10 +127,13 @@ function ProjectDetailPage() {
                 </div>
             )}
 
-            {stages.map((stage) => (
+            {stages.map((stage, index) => (
                 <Link className="card-link" to={`/projects/${projectId}/stages/${stage.id}`} key={stage.id}>
                     <div className="card">
-                        <h2 className="card-title">{stage.title}</h2>
+                        <h2 className="card-title">
+                            <span style={{color: 'var(--text-secondary)', fontWeight: 400, marginRight: '8px'}}>{index + 1}.</span>
+                            {stage.title}
+                        </h2>
                         <RichTextDisplay html={stage.description ?? ''} style={{fontSize: '14px', color: 'var(--text-secondary)'}} />
                     </div>
                 </Link>
