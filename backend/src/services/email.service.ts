@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = "Gradus <onboarding@resend.dev>";
+const FROM = "Gradus <noreply@gradus-apm.ru>";
 
 export async function sendDeadlineEmail(
     to: string,
