@@ -12,18 +12,18 @@ vi.mock("../src/prisma/prisma.js", () => ({
     prisma: {
         user: {
             findUnique: vi.fn(),
-            create: vi.fn()
+            create: vi.fn(),
+            update: vi.fn(),
         },
         refreshToken: {
-        create: vi.fn(),
-        delete: vi.fn(),
-        findFirst: vi.fn(),
-        deleteMany: vi.fn(),
-        findUnique: vi.fn()
-    }
+            create: vi.fn(),
+            delete: vi.fn(),
+            findFirst: vi.fn(),
+            deleteMany: vi.fn(),
+            findUnique: vi.fn(),
+        }
     },
-}
-));
+}));
 beforeEach(() => {
     vi.clearAllMocks();
 });
@@ -50,6 +50,7 @@ describe("authService.register", () => {
         const {prisma} = await import("../src/prisma/prisma.js");
         vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
         vi.mocked(prisma.user.create).mockResolvedValue({ id: "1", email: "user1@test.com" } as any);
+        vi.mocked(prisma.user.update).mockResolvedValue({ id: "1", email: "user1@test.com", isConfirmedEmail: true } as any);
         await expect(authService.register( "user1@test.com", "123", "User1", "Lastname1", "Student"))
             .resolves
             .toEqual({ id: "1", email: "user1@test.com" });
@@ -75,7 +76,7 @@ describe("authService.login", () => {
 
     it("should return tokens and user data if credentials are correct", async () => {
         const {prisma} = await import("../src/prisma/prisma.js");
-        vi.mocked(prisma.user.findUnique).mockResolvedValue({ id: "1", email: "user1@test.com", passwordHash: "$validhash" } as any);
+        vi.mocked(prisma.user.findUnique).mockResolvedValue({ id: "1", email: "user1@test.com", passwordHash: "$validhash", isConfirmedEmail: true } as any);
         vi.mocked(prisma.refreshToken.create).mockResolvedValue({ token: "refreshtoken" } as any);
         vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
         const result = await authService.login( "user1@test.com", "123");

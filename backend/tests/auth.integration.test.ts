@@ -14,12 +14,13 @@ vi.mock("../src/prisma/prisma.js", () => ({
     prisma: {
         user: {
             findUnique: vi.fn(),
-            create: vi.fn()
+            create: vi.fn(),
+            update: vi.fn(),
         },
         refreshToken: {
             create: vi.fn(),
             findUnique: vi.fn(),
-            delete: vi.fn()
+            delete: vi.fn(),
         }
     }
 }));
@@ -43,6 +44,7 @@ describe("POST /api/auth/register", () => {
             id: "1", email: "test@mail.ru", firstName: "Test", lastName: "User",
             role: "Student", passwordHash: "hashedpassword", createdAt: new Date()
         } as any);
+        vi.mocked(prisma.user.update).mockResolvedValue({ id: "1", isConfirmedEmail: true } as any);
 
         const res = await request(app)
             .post("/api/auth/register")
@@ -76,7 +78,7 @@ describe("POST /api/auth/login", () => {
         const bcrypt = await import("bcryptjs");
         vi.mocked(prisma.user.findUnique).mockResolvedValue({
             id: "1", email: "test@mail.ru", passwordHash: "hashedpassword",
-            firstName: "Test", lastName: "User", role: "Student", createdAt: new Date()
+            firstName: "Test", lastName: "User", role: "Student", createdAt: new Date(), isConfirmedEmail: true
         } as any);
         vi.mocked(bcrypt.default.compare).mockResolvedValue(true as never);
         vi.mocked(prisma.refreshToken.create).mockResolvedValue({} as any);
