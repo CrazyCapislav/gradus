@@ -50,7 +50,9 @@ function ProjectDetailPage() {
     }, [projectId, user]);
 
     function handleCreate() {
-        createStage(projectId!, newTitle, newDescription, newOrder, newSoftDeadline || undefined, newHardDeadline || undefined)
+        const softISO = newSoftDeadline ? new Date(newSoftDeadline).toISOString() : undefined;
+        const hardISO = newHardDeadline ? new Date(newHardDeadline).toISOString() : undefined;
+        createStage(projectId!, newTitle, newDescription, newOrder, softISO, hardISO)
             .then((data) => {
                 setStages([...stages, data]);
                 setShowModal(false);
