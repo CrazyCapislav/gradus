@@ -1,11 +1,11 @@
 import {useState, useEffect} from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getStages, createStage } from '../api/stages';
-import { inviteUser, getProjectById } from '../api/projects';
+import { inviteUser, getProjectById, deleteProject, updateProject } from '../api/projects';
 import { listUsers } from '../api/users';
 import RichTextEditor from '../components/RichTextEditor';
 import RichTextDisplay from '../components/RichTextDisplay';
-import type { Stage, User } from '../types/index';
+import type { Stage, User, Project } from '../types/index';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../store/useAuth';
 import { useLang } from '../store/langStore';
@@ -24,6 +24,8 @@ function ProjectDetailPage() {
     const [newSoftDeadline, setNewSoftDeadline] = useState('');
     const [newHardDeadline, setNewHardDeadline] = useState('');
     const [isTeacher, setIsTeacher] = useState(false);
+    const [project, setProject] = useState<Project | null>(null);
+    const navigate = useNavigate();
 
     const [inviteEmail, setInviteEmail] = useState('');
     const [allUsers, setAllUsers] = useState<User[]>([]);
@@ -35,9 +37,10 @@ function ProjectDetailPage() {
         Promise.all([
             getStages(projectId),
             getProjectById(projectId),
-        ]).then(([stagesData, project]) => {
+        ]).then(([stagesData, projectData]) => {
             setStages(stagesData);
-            const teacher = project.teacherId === user?.id;
+            setProject(projectData);
+            const teacher = projectData.teacherId === user?.id;
             setIsTeacher(teacher);
             setLoading(false);
             if (teacher) {
@@ -65,6 +68,16 @@ function ProjectDetailPage() {
             .catch((err) => setError(err.message));
     }
 
+    function handleDelete() {
+        if (!window.confirm(t.confirmDeleteProject)) return;
+        deleteProject(projectId!).then(() => navigate('/projects'));
+    }
+
+    function handleArchive() {
+        if (!window.confirm(t.confirmArchiveProject)) return;
+        updateProject(projectId!, { status: 'Archived' }).then((updated) => setProject(updated));
+    }
+
     function handleAddMember(memberId: string) {
         setSearchError(null);
         setInviteSuccess(null);
@@ -86,18 +99,52 @@ function ProjectDetailPage() {
     if (loading) return <div>{t.loading}</div>;
     if (error) return <div>Error: {error}</div>;
 
+    const isArchived = project?.status === 'Archived';
+
     return (
         <div className="page">
             <div className="page-header">
-                <h1>{t.stages}</h1>
-                {isTeacher && (
-                    <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px'}}>
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M8 2V14M2 8H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        </svg>
-                        {t.createStage}
-                    </button>
-                )}
+                <div style={{display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap'}}>
+                    <h1 style={{margin: 0}}>{t.stages}</h1>
+                    <span style={{
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        padding: '3px 10px',
+                        borderRadius: '999px',
+                        background: isTeacher ? 'var(--primary-muted, rgba(88,166,255,0.15))' : 'var(--bg-secondary)',
+                        color: isTeacher ? 'var(--primary)' : 'var(--text-secondary)',
+                        border: '1px solid ' + (isTeacher ? 'var(--primary)' : 'var(--border)'),
+                    }}>
+                        {isTeacher ? t.teacher : t.student}
+                    </span>
+                    {isArchived && (
+                        <span style={{fontSize: '12px', fontWeight: 600, padding: '3px 10px', borderRadius: '999px', background: 'rgba(139,148,158,0.15)', color: '#8B949E', border: '1px solid #8B949E'}}>
+                            Архив
+                        </span>
+                    )}
+                </div>
+                <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                    {isTeacher && !isArchived && (
+                        <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px'}}>
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8 2V14M2 8H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            </svg>
+                            {t.createStage}
+                        </button>
+                    )}
+                    {isTeacher && (
+                        <>
+                            {!isArchived && (
+                                <button className="btn btn-ghost" onClick={handleArchive} style={{padding: '6px 14px', fontSize: '13px'}}>
+                                    {t.archiveProject}
+                                </button>
+                            )}
+                            <button className="btn" onClick={handleDelete} style={{padding: '6px 14px', fontSize: '13px', background: 'rgba(248,81,73,0.15)', color: '#F85149', border: '1px solid #F85149'}}>
+                                {t.deleteProject}
+                            </button>
+                        </>
+                    )}
+                </div>
             </div>
 
             {isTeacher && (
