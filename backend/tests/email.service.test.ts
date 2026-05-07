@@ -1,12 +1,12 @@
 import { sendDeadlineEmail, sendVerificationEmail } from "../src/services/email.service.js";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const mockSend = vi.fn().mockResolvedValue({ id: "email-id" });
+const mockSend = vi.hoisted(() => vi.fn().mockResolvedValue({ id: "email-id" }));
 
 vi.mock("resend", () => ({
-    Resend: vi.fn().mockImplementation(() => ({
-        emails: { send: mockSend }
-    }))
+    Resend: vi.fn().mockImplementation(function () {
+        return { emails: { send: mockSend } };
+    })
 }));
 
 beforeEach(() => { vi.clearAllMocks(); });
