@@ -7,10 +7,15 @@ vi.mock("../src/prisma/prisma.js", () => ({
             create: vi.fn(),
             findUnique: vi.fn(),
             update: vi.fn()
+        },
+        stageResult: {
+            findUnique: vi.fn()
+        },
+        notification: {
+            create: vi.fn()
         }
     },
-}
-));
+}));
 
 beforeEach(() => {
     vi.clearAllMocks();
@@ -20,7 +25,9 @@ describe("gradeService.createGrade", () => {
     it("should create a new grade", async () => {
         const {prisma} = await import("../src/prisma/prisma.js");
         const mockGrade = { stageResultId: "1", score: 90, maxScore: 100, gradedById: "teacher1", feedback: "Good job!" };
+        vi.mocked(prisma.stageResult.findUnique).mockResolvedValue({ studentId: "student1", stage: { title: "Stage 1" } } as any);
         vi.mocked(prisma.grade.create).mockResolvedValue(mockGrade as any);
+        vi.mocked(prisma.notification.create).mockResolvedValue({} as any);
         const result = await gradeService.createGrade("1", 90, 100, "teacher1", "Good job!");
         expect(result).toEqual(mockGrade);
     });

@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import request from "supertest";
 import app from "../src/app.js";
 
+vi.mock("../src/services/email.service.js", () => ({
+    sendVerificationEmail: vi.fn(),
+    sendDeadlineEmail: vi.fn(),
+}));
+
 process.env.JWT_SECRET = "testjwtsecret";
 process.env.JWT_REFRESH_SECRET = "testrefreshsecret";
 

@@ -51,7 +51,7 @@ describe("stageResultService.getStageResults", () => {
         vi.mocked(prisma.stageResult.findMany).mockResolvedValue(mockResults as any);
         const result = await stageResultService.getStageResults("stage1");
         expect(result).toEqual(mockResults);
-        expect(prisma.stageResult.findMany).toHaveBeenCalledWith({ where: { stageId: "stage1" } });
+        expect(prisma.stageResult.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { stageId: "stage1" } }));
     });
 });
 

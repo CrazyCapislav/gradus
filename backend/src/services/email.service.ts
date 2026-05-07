@@ -1,7 +1,10 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = "Gradus <noreply@gradus-apm.ru>";
+
+function getResend() {
+    return new Resend(process.env.RESEND_API_KEY);
+}
 
 export async function sendDeadlineEmail(
     to: string,
@@ -19,7 +22,7 @@ export async function sendDeadlineEmail(
         ? `<p>Как преподаватель проекта, вы получаете это уведомление, чтобы быть в курсе состояния этапа.</p>`
         : `<p>Вы ещё можете сдать работу, однако она будет отмечена как просроченная.</p>`;
 
-    await resend.emails.send({
+    await getResend().emails.send({
         from: FROM,
         to,
         subject: `${subjectLabel} прошёл — ${stageTitle}`,
@@ -39,7 +42,7 @@ export async function sendVerificationEmail(to: string, firstName: string, token
     const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:5173";
     const link = `${frontendUrl}/verify-email?token=${token}`;
 
-    await resend.emails.send({
+    await getResend().emails.send({
         from: FROM,
         to,
         subject: "Подтвердите вашу почту — Gradus",

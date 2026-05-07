@@ -3,6 +3,11 @@ import authService from "../src/services/auth.service.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+vi.mock("../src/services/email.service.js", () => ({
+    sendVerificationEmail: vi.fn(),
+    sendDeadlineEmail: vi.fn(),
+}));
+
 vi.mock("../src/prisma/prisma.js", () => ({
     prisma: {
         user: {
