@@ -8,16 +8,20 @@ vi.mock("../src/prisma/prisma.js", () => ({
             findUnique: vi.fn(),
             findMany: vi.fn(),
             update: vi.fn(),
-            delete: vi.fn()
+            delete: vi.fn(),
         },
         projectMember: {
-        create: vi.fn(),
-        delete: vi.fn()
-        
-    }
+            create: vi.fn(),
+            delete: vi.fn(),
+            findUnique: vi.fn(),
+        },
+        notification: {
+            findFirst: vi.fn(),
+            create: vi.fn(),
+            update: vi.fn(),
+        }
     },
-}
-));
+}));
 
 beforeEach(() => {
     vi.clearAllMocks();
@@ -110,5 +114,54 @@ describe("projectService.submitProject", () => {
             where: { id: "1" },
             data: { status: "ReadyForGrade" }
         });
+    });
+});
+
+describe("projectService.getAllProjects", () => {
+    it("should return all projects", async () => {
+        const { prisma } = await import("../src/prisma/prisma.js");
+        const mockProjects = [{ id: "1" }, { id: "2" }];
+        vi.mocked(prisma.project.findMany).mockResolvedValue(mockProjects as any);
+        const result = await projectService.getAllProjects();
+        expect(result).toEqual(mockProjects);
+    });
+});
+
+describe("projectService.inviteUser", () => {
+    it("should create invitation notification", async () => {
+        const { prisma } = await import("../src/prisma/prisma.js");
+        vi.mocked(prisma.notification.findFirst).mockResolvedValue(null);
+        vi.mocked(prisma.notification.create).mockResolvedValue({} as any);
+        await projectService.inviteUser("p1", "u1", "Teacher Name", "Project A");
+        expect(prisma.notification.create).toHaveBeenCalledOnce();
+    });
+
+    it("should throw if invitation already sent", async () => {
+        const { prisma } = await import("../src/prisma/prisma.js");
+        vi.mocked(prisma.notification.findFirst).mockResolvedValue({ id: "n1" } as any);
+        await expect(projectService.inviteUser("p1", "u1", "Teacher", "Project A")).rejects.toThrow("Invitation already sent");
+    });
+});
+
+describe("projectService.acceptInvitation", () => {
+    it("should add member and mark notification as read", async () => {
+        const { prisma } = await import("../src/prisma/prisma.js");
+        vi.mocked(prisma.notification.findFirst).mockResolvedValue({ id: "n1" } as any);
+        vi.mocked(prisma.projectMember.findUnique).mockResolvedValue(null);
+        vi.mocked(prisma.projectMember.create).mockResolvedValue({} as any);
+        vi.mocked(prisma.notification.update).mockResolvedValue({} as any);
+        await projectService.acceptInvitation("p1", "u1");
+        expect(prisma.projectMember.create).toHaveBeenCalledOnce();
+        expect(prisma.notification.update).toHaveBeenCalledOnce();
+    });
+});
+
+describe("projectService.declineInvitation", () => {
+    it("should mark invitation notification as read", async () => {
+        const { prisma } = await import("../src/prisma/prisma.js");
+        vi.mocked(prisma.notification.findFirst).mockResolvedValue({ id: "n1" } as any);
+        vi.mocked(prisma.notification.update).mockResolvedValue({} as any);
+        await projectService.declineInvitation("p1", "u1");
+        expect(prisma.notification.update).toHaveBeenCalledWith({ where: { id: "n1" }, data: { isRead: true } });
     });
 });

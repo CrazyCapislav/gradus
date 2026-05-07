@@ -74,3 +74,25 @@ describe("stageResultService.updateStageResult", () => {
         expect(result).toEqual(mockResult);
     });
 });
+
+describe("stageResultService.getMyResult", () => {
+    it("should return student result for a stage", async () => {
+        const { prisma } = await import("../src/prisma/prisma.js");
+        const mockResult = { id: "r1", stageId: "s1", studentId: "u1" };
+        vi.mocked(prisma.stageResult.findUnique).mockResolvedValue(mockResult as any);
+        const result = await stageResultService.getMyResult("s1", "u1");
+        expect(result).toEqual(mockResult);
+    });
+});
+
+describe("stageResultService.updateMyResult", () => {
+    it("should update student own result", async () => {
+        const { prisma } = await import("../src/prisma/prisma.js");
+        vi.mocked(prisma.stage.findUnique).mockResolvedValue({ hardDeadline: null } as any);
+        const mockResult = { id: "r1", contentText: "new answer", isEdited: true };
+        vi.mocked(prisma.stageResult.update).mockResolvedValue(mockResult as any);
+        const result = await stageResultService.updateMyResult("s1", "u1", "new answer");
+        expect(result).toEqual(mockResult);
+        expect(prisma.stageResult.update).toHaveBeenCalledOnce();
+    });
+});

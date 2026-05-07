@@ -6,12 +6,12 @@ vi.mock("../src/prisma/prisma.js", () => ({
         stage: {
             create: vi.fn(),
             findMany: vi.fn(),
+            findUnique: vi.fn(),
             update: vi.fn(),
-            delete: vi.fn()
+            delete: vi.fn(),
         }
     },
-}
-));
+}));
 
 beforeEach(() => {
     vi.clearAllMocks();
@@ -54,5 +54,21 @@ describe("stageService.deleteStage", () => {
         vi.mocked(prisma.stage.delete).mockResolvedValue({} as any);
         await stageService.deleteStage("1");
         expect(prisma.stage.delete).toHaveBeenCalledWith({where: {id: "1"}})
+    });
+});
+
+describe("stageService.getStageById", () => {
+    it("should return stage by id", async () => {
+        const { prisma } = await import("../src/prisma/prisma.js");
+        const mockStage = { id: "1", title: "Stage 1", projectId: "p1" };
+        vi.mocked(prisma.stage.findUnique).mockResolvedValue(mockStage as any);
+        const result = await stageService.getStageById("1");
+        expect(result).toEqual(mockStage);
+    });
+
+    it("should throw if stage not found", async () => {
+        const { prisma } = await import("../src/prisma/prisma.js");
+        vi.mocked(prisma.stage.findUnique).mockResolvedValue(null);
+        await expect(stageService.getStageById("missing")).rejects.toThrow("Stage not found");
     });
 });
