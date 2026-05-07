@@ -20,7 +20,6 @@ function ProjectDetailPage() {
     const [showModal, setShowModal] = useState(false);
     const [newTitle, setNewTitle] = useState('');
     const [newDescription, setNewDescription] = useState('');
-    const [newOrder, setNewOrder] = useState(1);
     const [newSoftDeadline, setNewSoftDeadline] = useState('');
     const [newHardDeadline, setNewHardDeadline] = useState('');
     const [isTeacher, setIsTeacher] = useState(false);
@@ -55,13 +54,12 @@ function ProjectDetailPage() {
     function handleCreate() {
         const softISO = newSoftDeadline ? new Date(newSoftDeadline).toISOString() : undefined;
         const hardISO = newHardDeadline ? new Date(newHardDeadline).toISOString() : undefined;
-        createStage(projectId!, newTitle, newDescription, newOrder, softISO, hardISO)
+        createStage(projectId!, newTitle, newDescription, stages.length + 1, softISO, hardISO)
             .then((data) => {
                 setStages([...stages, data]);
                 setShowModal(false);
                 setNewTitle('');
                 setNewDescription('');
-                setNewOrder(stages.length + 2);
                 setNewSoftDeadline('');
                 setNewHardDeadline('');
             })
@@ -199,10 +197,6 @@ function ProjectDetailPage() {
                         <div className="form-group">
                             <label>{t.description}</label>
                             <RichTextEditor value={newDescription} onChange={setNewDescription} placeholder={t.description} minHeight="100px" />
-                        </div>
-                        <div className="form-group">
-                            <label>{t.order}</label>
-                            <input className="input" type="number" value={newOrder} onChange={e => setNewOrder(Number(e.target.value))} min={1} />
                         </div>
                         <div className="form-group">
                             <label>{t.softDeadline}</label>

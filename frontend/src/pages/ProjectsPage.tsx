@@ -70,14 +70,31 @@ function ProjectsPage() {
                     </button>
             </div>
             
-            {projects.map((project) => (
-                <Link className="card-link" key={project.id} to={`/projects/${project.id}`}>
-                    <div className="card">
-                        <h2 className="card-title">{project.title}</h2>
-                        <RichTextDisplay html={project.description ?? ''} style={{fontSize: '14px', color: 'var(--text-secondary)'}} />
-                    </div>
-                </Link>
-            ))}
+            {projects.map((project) => {
+                const isOwner = project.teacherId === user?.id;
+                return (
+                    <Link className="card-link" key={project.id} to={`/projects/${project.id}`}>
+                        <div className="card">
+                            <div style={{display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px'}}>
+                                <h2 className="card-title" style={{margin: 0}}>{project.title}</h2>
+                                <span style={{
+                                    fontSize: '11px',
+                                    fontWeight: 600,
+                                    padding: '2px 8px',
+                                    borderRadius: '999px',
+                                    background: isOwner ? 'rgba(88,166,255,0.15)' : 'var(--bg-secondary)',
+                                    color: isOwner ? 'var(--primary)' : 'var(--text-secondary)',
+                                    border: '1px solid ' + (isOwner ? 'var(--primary)' : 'var(--border)'),
+                                    flexShrink: 0,
+                                }}>
+                                    {isOwner ? t.teacher : t.student}
+                                </span>
+                            </div>
+                            <RichTextDisplay html={project.description ?? ''} style={{fontSize: '14px', color: 'var(--text-secondary)'}} />
+                        </div>
+                    </Link>
+                );
+            })}
             
             {showModal && (
                 <div className="modal-overlay">
