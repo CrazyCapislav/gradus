@@ -1,5 +1,5 @@
 import './App.css'
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -15,6 +15,12 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import { NotificationProvider } from './store/notificationStore';
 import { ToastProvider } from './components/Toast';
+import { useAuth } from './store/useAuth';
+
+function RootRedirect() {
+  const { user } = useAuth();
+  return <Navigate to={user ? '/projects' : '/login'} replace />;
+}
 
 function App() {
   return (
@@ -27,7 +33,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
-            <Route path="/" element={<div>Home</div>} />
+            <Route path="/" element={<RootRedirect />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDetailPage /></ProtectedRoute>} />
             <Route path="/projects/:projectId/stages/:stageId" element={<ProtectedRoute><StageDetailPage /></ProtectedRoute>} />
