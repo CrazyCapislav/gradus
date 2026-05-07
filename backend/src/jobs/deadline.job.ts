@@ -18,18 +18,21 @@ async function notifyDeadline(type: "soft" | "hard") {
                     members: { include: { user: true } },
                     teacher: true,
                 }
-            }
+            },
+            stageResults: { select: { studentId: true } }
         }
     });
 
     for (const stage of stages) {
         const { project } = stage;
+        const submittedStudentIds = new Set(stage.stageResults.map(r => r.studentId));
         const students = project.members.map(m => m.user);
         const teacher = project.teacher;
         const recipients = [...students, { ...teacher, isTeacher: true }];
 
         for (const recipient of recipients) {
             const isTeacher = recipient.id === project.teacherId;
+            if (!isTeacher && submittedStudentIds.has(recipient.id)) continue;
             const message = type === "soft"
                 ? JSON.stringify({ key: "notif_softDeadlinePassed", params: { stageTitle: stage.title } })
                 : JSON.stringify({ key: "notif_hardDeadlinePassed", params: { stageTitle: stage.title } });
