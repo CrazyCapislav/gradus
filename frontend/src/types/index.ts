@@ -49,6 +49,7 @@ export interface StageResult {
     editedAfterDeadline: boolean;
     submittedAt?: string;
     fileAttachments?: FileAttachment[];
+    grade?: Grade;
     student?: { id: string; firstName: string; lastName: string; email: string };
 }
 
@@ -80,10 +81,10 @@ export interface StageMaterial {
 export interface Grade {
     id: string;
     stageResultId: string;
-    score: number;
+    isAccepted: boolean;
     feedback?: string;
     gradedAt: string;
-    maxScore: number;
     gradedById: string;
 }
+
 

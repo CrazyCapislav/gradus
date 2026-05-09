@@ -26,13 +26,13 @@ beforeEach(() => {
 });
 
 describe("gradeService.createGrade", () => {
-    it("should create a new grade", async () => {
+    it("should create a new grade with isAccepted", async () => {
         const {prisma} = await import("../src/prisma/prisma.js");
-        const mockGrade = { stageResultId: "1", score: 90, maxScore: 100, gradedById: "teacher1", feedback: "Good job!" };
+        const mockGrade = { stageResultId: "1", isAccepted: true, gradedById: "teacher1", feedback: "Good job!" };
         vi.mocked(prisma.stageResult.findUnique).mockResolvedValue({ studentId: "student1", stage: { title: "Stage 1" }, student: { email: "s@test.ru", firstName: "Ivan" } } as any);
         vi.mocked(prisma.grade.create).mockResolvedValue(mockGrade as any);
         vi.mocked(prisma.notification.create).mockResolvedValue({} as any);
-        const result = await gradeService.createGrade("1", 90, 100, "teacher1", "Good job!");
+        const result = await gradeService.createGrade("1", true, "teacher1", "Good job!");
         expect(result).toEqual(mockGrade);
     });
 });
@@ -50,9 +50,9 @@ describe("gradeService.getGrade", () => {
 describe("gradeService.updateGrade", () => {
     it("should update a grade", async () => {
         const {prisma} = await import("../src/prisma/prisma.js");
-        const mockGrade = { stageResultId: "1", score: 95, maxScore: 100, gradedById: "teacher1", feedback: "Excellent improvement!" };
+        const mockGrade = { stageResultId: "1", isAccepted: false, gradedById: "teacher1", feedback: "Needs revision" };
         vi.mocked(prisma.grade.update).mockResolvedValue(mockGrade as any);
-        const result = await gradeService.updateGrade("1", { score: 95, feedback: "Excellent improvement!" });
+        const result = await gradeService.updateGrade("1", { isAccepted: false, feedback: "Needs revision" });
         expect(result).toEqual(mockGrade);
     });
 });

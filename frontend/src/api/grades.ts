@@ -1,8 +1,7 @@
 import client from './client';
-import type { StageResult } from '../types';
+import type { Grade } from '../types';
 
-
-export const gradeStageResult = async (stageResultId: string, score: number, maxScore: number, feedback?: string): Promise<StageResult> => {
-    const response = await client.post(`/results/${stageResultId}/grade`, { score, maxScore, feedback });
+export const gradeStageResult = async (stageResultId: string, isAccepted: boolean, feedback?: string): Promise<Grade> => {
+    const response = await client.post(`/results/${stageResultId}/grade`, { isAccepted, feedback });
     return response.data;
 }

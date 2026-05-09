@@ -45,7 +45,7 @@ async function createStageResult(stageId: string, studentId: string, contentText
 async function getMyResult(stageId: string, studentId: string) {
     return await prisma.stageResult.findUnique({
         where: { stageId_studentId: { stageId, studentId } },
-        include: { fileAttachments: true }
+        include: { fileAttachments: true, grade: true }
     });
 }
 
@@ -67,6 +67,7 @@ async function getStageResults(stageId: string) {
         where: { stageId },
         include: {
             fileAttachments: true,
+            grade: true,
             student: { select: { id: true, firstName: true, lastName: true, email: true } }
         }
     });

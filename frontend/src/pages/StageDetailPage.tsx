@@ -25,10 +25,9 @@ function StageDetailPage() {
     const { t } = useLang();
     const { showToast } = useToast();
     const [selectedResultId, setSelectedResultId] = useState<string | null>(null);
-    const [score, setScore] = useState<number>(0);
-    const [maxScore, setMaxScore] = useState<number>(100);
+    const [isAccepted, setIsAccepted] = useState<boolean | null>(null);
     const [feedback, setFeedback] = useState<string>('');
-    const [files, setFiles] = useState<FileList | null>(null);
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [materials, setMaterials] = useState<StageMaterial[]>([]);
     const materialInputRef = useRef<HTMLInputElement>(null);
     const [myResult, setMyResult] = useState<StageResult | null>(null);
@@ -85,13 +84,13 @@ function StageDetailPage() {
             submitStageResult(projectId, stageId, contentText)
                 .then((result) => {
                     setMyResult(result);
-                    if (files) {
-                        return Promise.all(Array.from(files).map(file => uploadFile(result.id, file)));
+                    if (selectedFiles.length > 0) {
+                        return Promise.all(selectedFiles.map(file => uploadFile(result.id, file)));
                     }
                 })
                 .then(() => {
                     setContentText('');
-                    setFiles(null);
+                    setSelectedFiles([]);
                     showToast(t.toastResultSubmitted, 'success');
                 })
                 .catch((err) => { setError(err.message); showToast(err.message, 'error'); });
@@ -134,10 +133,14 @@ function StageDetailPage() {
     }
 
     function handleGrade(resultId: string) {
-        gradeStageResult(resultId, score, maxScore, feedback)
-            .then(() => {
+        if (isAccepted === null) return;
+        gradeStageResult(resultId, isAccepted, feedback || undefined)
+            .then((grade) => {
+                setResults(prev => prev.map(r => r.id === resultId ? { ...r, grade } : r));
                 showToast(t.toastGradeSubmitted, 'success');
                 setSelectedResultId(null);
+                setIsAccepted(null);
+                setFeedback('');
             })
             .catch((err) => { setError(err.message); showToast(err.message, 'error'); });
     }
@@ -232,6 +235,19 @@ function StageDetailPage() {
                         )}
                     </div>
 
+                    {myResult?.grade && !isEditing && (
+                        <div style={{marginBottom: '16px', padding: '12px 16px', borderRadius: 'var(--radius-sm)', background: myResult.grade.isAccepted ? 'rgba(63,185,80,0.08)' : 'rgba(248,81,73,0.08)', border: `1px solid ${myResult.grade.isAccepted ? '#3FB950' : 'var(--error)'}`}}>
+                            <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: myResult.grade.feedback ? '8px' : '0'}}>
+                                <span style={{fontSize: '15px', fontWeight: 700, color: myResult.grade.isAccepted ? '#3FB950' : 'var(--error)'}}>
+                                    {myResult.grade.isAccepted ? '✓ ' + t.accepted : '✗ ' + t.notAccepted}
+                                </span>
+                            </div>
+                            {myResult.grade.feedback && (
+                                <p style={{margin: 0, fontSize: '13px', color: 'var(--text-secondary)'}}><strong style={{color: 'var(--text)'}}>{t.feedback}:</strong> {myResult.grade.feedback}</p>
+                            )}
+                        </div>
+                    )}
+
                     {myResult && !isEditing && (
                         <>
                             <div style={{display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px'}}>
@@ -307,17 +323,24 @@ function StageDetailPage() {
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
                                     </svg>
-                                    {files && files.length > 0
-                                        ? `${files.length} ${files.length === 1 ? 'файл' : 'файла'} выбрано`
-                                        : 'Прикрепить файлы'}
-                                    <input type="file" multiple accept=".pdf,.doc,.docx,.zip" style={{display: 'none'}} onChange={(e) => setFiles(e.target.files)} />
+                                    Прикрепить файлы
+                                    <input type="file" multiple accept=".pdf,.doc,.docx,.zip" style={{display: 'none'}}
+                                        onChange={(e) => {
+                                            const added = Array.from(e.target.files ?? []);
+                                            setSelectedFiles(prev => {
+                                                const existing = new Set(prev.map(f => f.name + f.size));
+                                                return [...prev, ...added.filter(f => !existing.has(f.name + f.size))];
+                                            });
+                                            e.target.value = '';
+                                        }} />
                                 </label>
-                                {files && files.length > 0 && (
+                                {selectedFiles.length > 0 && (
                                     <div style={{marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '6px'}}>
-                                        {Array.from(files).map((f, i) => (
-                                            <span key={i} style={{display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px', background: 'rgba(88,166,255,0.08)', border: '1px solid rgba(88,166,255,0.2)', borderRadius: '999px', fontSize: '12px', color: 'var(--accent)'}}>
+                                        {selectedFiles.map((f, i) => (
+                                            <span key={i} style={{display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px 3px 10px', background: 'rgba(88,166,255,0.08)', border: '1px solid rgba(88,166,255,0.2)', borderRadius: '999px', fontSize: '12px', color: 'var(--accent)'}}>
                                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
                                                 {f.name}
+                                                <button onClick={() => setSelectedFiles(prev => prev.filter((_, j) => j !== i))} style={{background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', color: 'var(--text-secondary)', lineHeight: 1, fontSize: '14px'}} title="Убрать">×</button>
                                             </span>
                                         ))}
                                     </div>
@@ -379,16 +402,37 @@ function StageDetailPage() {
                                     ))}
                                 </div>
                             )}
-                            <button className="btn btn-secondary btn-sm" onClick={() => setSelectedResultId(result.id)}>{t.grade}</button>
-                            {selectedResultId === result.id && (
-                                <div style={{marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                                    <div style={{display: 'flex', gap: '8px'}}>
-                                        <input className="input" type="number" min={0} value={score} onChange={(e) => setScore(Number(e.target.value))} placeholder={t.score} style={{flex: 1}} />
-                                        <input className="input" type="number" min={1} value={maxScore} onChange={(e) => setMaxScore(Number(e.target.value))} placeholder={t.maxScore} style={{flex: 1}} />
-                                    </div>
-                                    <textarea className="input" value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder={t.feedback} />
-                                    <button className="btn btn-primary btn-sm" onClick={() => handleGrade(result.id)}>{t.submitGrade}</button>
+                            {result.grade ? (
+                                <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
+                                    <span style={{display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: 600, background: result.grade.isAccepted ? 'rgba(63,185,80,0.12)' : 'rgba(248,81,73,0.12)', border: `1px solid ${result.grade.isAccepted ? '#3FB950' : 'var(--error)'}`, color: result.grade.isAccepted ? '#3FB950' : 'var(--error)', alignSelf: 'flex-start'}}>
+                                        {result.grade.isAccepted ? '✓ ' + t.accepted : '✗ ' + t.notAccepted}
+                                    </span>
+                                    {result.grade.feedback && <p style={{margin: 0, fontSize: '13px', color: 'var(--text-secondary)'}}>{result.grade.feedback}</p>}
                                 </div>
+                            ) : (
+                                <>
+                                    <button className="btn btn-secondary btn-sm" style={{marginTop: '8px'}} onClick={() => { setSelectedResultId(result.id); setIsAccepted(null); setFeedback(''); }}>{t.grade}</button>
+                                    {selectedResultId === result.id && (
+                                        <div style={{marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                            <div style={{display: 'flex', gap: '8px'}}>
+                                                <button
+                                                    className="btn btn-sm"
+                                                    onClick={() => setIsAccepted(true)}
+                                                    style={{flex: 1, background: isAccepted === true ? '#3FB950' : 'transparent', color: isAccepted === true ? '#0D1117' : '#3FB950', border: '1px solid #3FB950', fontWeight: isAccepted === true ? 700 : 400}}>
+                                                    ✓ {t.accepted}
+                                                </button>
+                                                <button
+                                                    className="btn btn-sm"
+                                                    onClick={() => setIsAccepted(false)}
+                                                    style={{flex: 1, background: isAccepted === false ? 'var(--error)' : 'transparent', color: isAccepted === false ? '#fff' : 'var(--error)', border: '1px solid var(--error)', fontWeight: isAccepted === false ? 700 : 400}}>
+                                                    ✗ {t.notAccepted}
+                                                </button>
+                                            </div>
+                                            <textarea className="input" value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder={t.feedback} />
+                                            <button className="btn btn-primary btn-sm" disabled={isAccepted === null} onClick={() => handleGrade(result.id)}>{t.submitGrade}</button>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     ))}

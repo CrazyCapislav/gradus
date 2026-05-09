@@ -166,9 +166,8 @@ model Grade {
   id String @id @db.Uuid @default(uuid())
   stageResultId String @db.Uuid @unique @map("stage_result_id")
   stageResult StageResult @relation(fields: [stageResultId], references: [id], onDelete: Cascade)
-  score Decimal @db.Decimal(5, 2)
-  maxScore Decimal @map("max_score") @db.Decimal(5, 2)
-  feedback String? 
+  isAccepted Boolean @map("is_accepted")
+  feedback String?
   gradedAt DateTime @default(now()) @map("graded_at")
   gradedById String @db.Uuid @map("graded_by")
   gradedBy User @relation(fields: [gradedById], references: [id], onDelete: Cascade)

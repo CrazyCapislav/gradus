@@ -67,10 +67,11 @@ export async function sendGradeReceivedEmail(
     to: string,
     studentFirstName: string,
     stageTitle: string,
-    score: number,
-    maxScore: number,
+    isAccepted: boolean,
     feedback?: string
 ) {
+    const statusLabel = isAccepted ? "Принято" : "Не принято";
+    const statusColor = isAccepted ? "#3FB950" : "#F85149";
     const feedbackBlock = feedback
         ? `<p><strong>Комментарий преподавателя:</strong> ${feedback}</p>`
         : "";
@@ -78,13 +79,13 @@ export async function sendGradeReceivedEmail(
     await getResend().emails.send({
         from: FROM,
         to,
-        subject: `Получена оценка — ${stageTitle}`,
+        subject: `Работа проверена — ${stageTitle}`,
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; background: #0D1117; color: #CDD6F4; padding: 32px; border-radius: 12px;">
-                <h2 style="color: #3FB950; margin-top: 0;">Вам выставлена оценка</h2>
+                <h2 style="color: ${statusColor}; margin-top: 0;">${statusLabel}</h2>
                 <p>Привет, ${studentFirstName}!</p>
-                <p>Преподаватель оценил ваш этап <strong>«${stageTitle}»</strong>.</p>
-                <p style="font-size: 22px; font-weight: 700; color: #58A6FF;">${score} / ${maxScore}</p>
+                <p>Преподаватель проверил вашу работу по этапу <strong>«${stageTitle}»</strong>.</p>
+                <p style="font-size: 20px; font-weight: 700; color: ${statusColor};">${statusLabel}</p>
                 ${feedbackBlock}
                 <p style="color: #8B949E; font-size: 13px;">Это автоматическое уведомление от Gradus.</p>
             </div>

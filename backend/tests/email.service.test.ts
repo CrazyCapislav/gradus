@@ -59,21 +59,20 @@ describe("sendStageSubmittedEmail", () => {
 });
 
 describe("sendGradeReceivedEmail", () => {
-    it("should send grade received email to student", async () => {
-        await sendGradeReceivedEmail("student@test.ru", "Ivan", "Stage 1", 85, 100, "Хорошая работа");
+    it("should send accepted grade email to student", async () => {
+        await sendGradeReceivedEmail("student@test.ru", "Ivan", "Stage 1", true, "Хорошая работа");
         expect(mockSend).toHaveBeenCalledOnce();
         const call = mockSend.mock.calls[0][0];
         expect(call.subject).toContain("Stage 1");
-        expect(call.html).toContain("85");
-        expect(call.html).toContain("100");
+        expect(call.html).toContain("Принято");
         expect(call.html).toContain("Хорошая работа");
     });
 
-    it("should send grade received email without feedback", async () => {
-        await sendGradeReceivedEmail("student@test.ru", "Ivan", "Stage 1", 90, 100);
+    it("should send rejected grade email to student", async () => {
+        await sendGradeReceivedEmail("student@test.ru", "Ivan", "Stage 1", false);
         expect(mockSend).toHaveBeenCalledOnce();
         const call = mockSend.mock.calls[0][0];
-        expect(call.html).toContain("90");
+        expect(call.html).toContain("Не принято");
     });
 });
 

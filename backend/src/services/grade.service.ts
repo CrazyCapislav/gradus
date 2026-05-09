@@ -2,7 +2,7 @@ import {prisma} from "../prisma/prisma.js";
 import type { GradeModel } from "../generated/prisma/models.js";
 import { sendGradeReceivedEmail } from "./email.service.js";
 
-async function createGrade(stageResultId: string, score: number, maxScore: number, gradedById: string, feedback: string| undefined): Promise<GradeModel> {
+async function createGrade(stageResultId: string, isAccepted: boolean, gradedById: string, feedback: string | undefined): Promise<GradeModel> {
     const stageResult = await prisma.stageResult.findUnique({
         where: { id: stageResultId },
         select: {
@@ -14,17 +14,18 @@ async function createGrade(stageResultId: string, score: number, maxScore: numbe
 
     const grade = await prisma.grade.create({
         data: {
-            stageResultId, score, maxScore, gradedById,
-            ...(feedback !== undefined && { feedback})
+            stageResultId, isAccepted, gradedById,
+            ...(feedback !== undefined && { feedback })
         }
     });
 
     if (stageResult) {
+        const status = isAccepted ? "принята" : "не принята";
         await prisma.notification.create({
             data: {
                 userId: stageResult.studentId,
                 type: "GradeReceived",
-                message: JSON.stringify({ key: "notif_gradeReceived", params: { stageTitle: stageResult.stage.title, score, maxScore } }),
+                message: JSON.stringify({ key: "notif_gradeReceived", params: { stageTitle: stageResult.stage.title, status } }),
                 referenceId: grade.id,
                 referenceType: "Grade"
             }
@@ -35,8 +36,7 @@ async function createGrade(stageResultId: string, score: number, maxScore: numbe
                 stageResult.student.email,
                 stageResult.student.firstName,
                 stageResult.stage.title,
-                score,
-                maxScore,
+                isAccepted,
                 feedback
             ).catch(() => {});
         }
@@ -52,7 +52,7 @@ async function getGrade(stageResultId: string) {
 }
 
 
-async function updateGrade(stageResultId: string, data: { score?: number; feedback?: string }) {
+async function updateGrade(stageResultId: string, data: { isAccepted?: boolean; feedback?: string }) {
     return await prisma.grade.update({
         where: { stageResultId },
         data: data
