@@ -137,7 +137,7 @@ function StageDetailPage() {
         gradeStageResult(resultId, isAccepted, feedback || undefined)
             .then((grade) => {
                 setResults(prev => prev.map(r => r.id === resultId ? { ...r, grade } : r));
-                showToast(t.toastGradeSubmitted, 'success');
+                showToast(isAccepted ? t.toastWorkAccepted : t.toastWorkRejected, isAccepted ? 'success' : 'error');
                 setSelectedResultId(null);
                 setIsAccepted(null);
                 setFeedback('');
