@@ -1,6 +1,7 @@
 import {prisma} from "../prisma/prisma.js";
 import type { ProjectModel } from "../generated/prisma/models.js";
 import { ProjectStatus } from "../generated/prisma/enums.js";
+import { sendProjectInvitationEmail } from "./email.service.js";
 async function createProject(teacherId: string, title: string, description: string| undefined): Promise<ProjectModel> {
     return await prisma.project.create({
         data: {
@@ -65,6 +66,14 @@ async function inviteUser(projectId: string, invitedUserId: string, teacherName:
             referenceType: "Project",
         }
     });
+
+    const invitedUser = await prisma.user.findUnique({
+        where: { id: invitedUserId },
+        select: { email: true, firstName: true }
+    });
+    if (invitedUser) {
+        sendProjectInvitationEmail(invitedUser.email, invitedUser.firstName, teacherName, projectTitle).catch(() => {});
+    }
 }
 
 async function acceptInvitation(projectId: string, userId: string) {

@@ -1,4 +1,4 @@
-import { sendDeadlineEmail, sendVerificationEmail } from "../src/services/email.service.js";
+import { sendDeadlineEmail, sendVerificationEmail, sendStageSubmittedEmail, sendGradeReceivedEmail, sendProjectInvitationEmail } from "../src/services/email.service.js";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const mockSend = vi.hoisted(() => vi.fn().mockResolvedValue({ id: "email-id" }));
@@ -44,5 +44,47 @@ describe("sendVerificationEmail", () => {
         const call = mockSend.mock.calls[0][0];
         expect(call.subject).toContain("Подтвердите");
         expect(call.html).toContain("token123");
+    });
+});
+
+describe("sendStageSubmittedEmail", () => {
+    it("should send stage submitted email to teacher", async () => {
+        await sendStageSubmittedEmail("teacher@test.ru", "Anna", "Ivan Ivanov", "Stage 1", "Project A");
+        expect(mockSend).toHaveBeenCalledOnce();
+        const call = mockSend.mock.calls[0][0];
+        expect(call.subject).toContain("Stage 1");
+        expect(call.html).toContain("Ivan Ivanov");
+        expect(call.html).toContain("Project A");
+    });
+});
+
+describe("sendGradeReceivedEmail", () => {
+    it("should send grade received email to student", async () => {
+        await sendGradeReceivedEmail("student@test.ru", "Ivan", "Stage 1", 85, 100, "Хорошая работа");
+        expect(mockSend).toHaveBeenCalledOnce();
+        const call = mockSend.mock.calls[0][0];
+        expect(call.subject).toContain("Stage 1");
+        expect(call.html).toContain("85");
+        expect(call.html).toContain("100");
+        expect(call.html).toContain("Хорошая работа");
+    });
+
+    it("should send grade received email without feedback", async () => {
+        await sendGradeReceivedEmail("student@test.ru", "Ivan", "Stage 1", 90, 100);
+        expect(mockSend).toHaveBeenCalledOnce();
+        const call = mockSend.mock.calls[0][0];
+        expect(call.html).toContain("90");
+    });
+});
+
+describe("sendProjectInvitationEmail", () => {
+    it("should send project invitation email", async () => {
+        process.env.FRONTEND_URL = "http://localhost:5173";
+        await sendProjectInvitationEmail("student@test.ru", "Ivan", "Anna Teacher", "Project A");
+        expect(mockSend).toHaveBeenCalledOnce();
+        const call = mockSend.mock.calls[0][0];
+        expect(call.subject).toContain("Project A");
+        expect(call.html).toContain("Anna Teacher");
+        expect(call.html).toContain("Ivan");
     });
 });

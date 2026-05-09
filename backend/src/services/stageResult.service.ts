@@ -1,11 +1,12 @@
 import {prisma} from "../prisma/prisma.js";
 import type { StageResultModel } from "../generated/prisma/models.js";
 import { StageResultStatus } from "../generated/prisma/enums.js";
+import { sendStageSubmittedEmail } from "./email.service.js";
 
 async function createStageResult(stageId: string, studentId: string, contentText?: string): Promise<StageResultModel> {
     const stage = await prisma.stage.findUnique({
         where: { id: stageId },
-        select: { hardDeadline: true, project: { select: { teacherId: true, title: true } } }
+        select: { title: true, hardDeadline: true, project: { select: { teacherId: true, title: true } } }
     });
     const now = new Date();
     const isLate = stage?.hardDeadline ? now > stage.hardDeadline : false;
@@ -28,6 +29,15 @@ async function createStageResult(stageId: string, studentId: string, contentText
                 referenceType: "StageResult"
             }
         });
+
+        const [teacher, student] = await Promise.all([
+            prisma.user.findUnique({ where: { id: stage.project.teacherId }, select: { email: true, firstName: true } }),
+            prisma.user.findUnique({ where: { id: studentId }, select: { firstName: true, lastName: true } }),
+        ]);
+        if (teacher) {
+            const studentName = student ? `${student.firstName} ${student.lastName}` : "Студент";
+            sendStageSubmittedEmail(teacher.email, teacher.firstName, studentName, stage.title, stage.project.title).catch(() => {});
+        }
     }
     return result;
 }

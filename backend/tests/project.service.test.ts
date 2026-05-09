@@ -1,6 +1,10 @@
 import projectService from "../src/services/project.service.js";
 import {describe, it, expect, vi, beforeEach} from "vitest";
 
+vi.mock("../src/services/email.service.js", () => ({
+    sendProjectInvitationEmail: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock("../src/prisma/prisma.js", () => ({
     prisma: {
         project: {
@@ -19,6 +23,9 @@ vi.mock("../src/prisma/prisma.js", () => ({
             findFirst: vi.fn(),
             create: vi.fn(),
             update: vi.fn(),
+        },
+        user: {
+            findUnique: vi.fn(),
         }
     },
 }));
@@ -132,6 +139,7 @@ describe("projectService.inviteUser", () => {
         const { prisma } = await import("../src/prisma/prisma.js");
         vi.mocked(prisma.notification.findFirst).mockResolvedValue(null);
         vi.mocked(prisma.notification.create).mockResolvedValue({} as any);
+        vi.mocked(prisma.user.findUnique).mockResolvedValue({ email: "u@test.ru", firstName: "User" } as any);
         await projectService.inviteUser("p1", "u1", "Teacher Name", "Project A");
         expect(prisma.notification.create).toHaveBeenCalledOnce();
     });

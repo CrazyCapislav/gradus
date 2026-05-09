@@ -1,10 +1,15 @@
 import {prisma} from "../prisma/prisma.js";
 import type { GradeModel } from "../generated/prisma/models.js";
+import { sendGradeReceivedEmail } from "./email.service.js";
 
 async function createGrade(stageResultId: string, score: number, maxScore: number, gradedById: string, feedback: string| undefined): Promise<GradeModel> {
     const stageResult = await prisma.stageResult.findUnique({
         where: { id: stageResultId },
-        select: { studentId: true, stage: { select: { title: true } } }
+        select: {
+            studentId: true,
+            stage: { select: { title: true } },
+            student: { select: { email: true, firstName: true } }
+        }
     });
 
     const grade = await prisma.grade.create({
@@ -24,6 +29,17 @@ async function createGrade(stageResultId: string, score: number, maxScore: numbe
                 referenceType: "Grade"
             }
         });
+
+        if (stageResult.student) {
+            sendGradeReceivedEmail(
+                stageResult.student.email,
+                stageResult.student.firstName,
+                stageResult.stage.title,
+                score,
+                maxScore,
+                feedback
+            ).catch(() => {});
+        }
     }
 
     return grade;

@@ -1,6 +1,10 @@
 import stageResultService from "../src/services/stageResult.service.js";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+vi.mock("../src/services/email.service.js", () => ({
+    sendStageSubmittedEmail: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock("../src/prisma/prisma.js", () => ({
     prisma: {
         stage: { findUnique: vi.fn() },
@@ -10,7 +14,8 @@ vi.mock("../src/prisma/prisma.js", () => ({
             findUnique: vi.fn(),
             update: vi.fn()
         },
-        notification: { create: vi.fn() }
+        notification: { create: vi.fn() },
+        user: { findUnique: vi.fn() }
     }
 }));
 
@@ -21,11 +26,12 @@ beforeEach(() => {
 describe("stageResultService.createStageResult", () => {
     it("should create a stage result and send notification", async () => {
         const { prisma } = await import("../src/prisma/prisma.js");
-        const mockStage = { hardDeadline: null, project: { teacherId: "teacher1", title: "Project A" } };
+        const mockStage = { title: "Stage 1", hardDeadline: null, project: { teacherId: "teacher1", title: "Project A" } };
         const mockResult = { id: "result1", stageId: "stage1", studentId: "student1", isLate: false };
         vi.mocked(prisma.stage.findUnique).mockResolvedValue(mockStage as any);
         vi.mocked(prisma.stageResult.create).mockResolvedValue(mockResult as any);
         vi.mocked(prisma.notification.create).mockResolvedValue({} as any);
+        vi.mocked(prisma.user.findUnique).mockResolvedValue({ email: "t@test.ru", firstName: "Teacher", lastName: "One" } as any);
         const result = await stageResultService.createStageResult("stage1", "student1", "my answer");
         expect(result).toEqual(mockResult);
         expect(prisma.notification.create).toHaveBeenCalledOnce();
@@ -34,11 +40,12 @@ describe("stageResultService.createStageResult", () => {
     it("should mark result as late if past hardDeadline", async () => {
         const { prisma } = await import("../src/prisma/prisma.js");
         const pastDate = new Date(Date.now() - 1000 * 60 * 60);
-        const mockStage = { hardDeadline: pastDate, project: { teacherId: "teacher1", title: "Project A" } };
+        const mockStage = { title: "Stage 1", hardDeadline: pastDate, project: { teacherId: "teacher1", title: "Project A" } };
         const mockResult = { id: "result1", stageId: "stage1", studentId: "student1", isLate: true };
         vi.mocked(prisma.stage.findUnique).mockResolvedValue(mockStage as any);
         vi.mocked(prisma.stageResult.create).mockResolvedValue(mockResult as any);
         vi.mocked(prisma.notification.create).mockResolvedValue({} as any);
+        vi.mocked(prisma.user.findUnique).mockResolvedValue({ email: "t@test.ru", firstName: "Teacher", lastName: "One" } as any);
         const result = await stageResultService.createStageResult("stage1", "student1");
         expect(result.isLate).toBe(true);
     });
